@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import styles from "./register.module.css";
 
@@ -99,7 +99,7 @@ function getStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
     return s as 0 | 1 | 2 | 3 | 4;
 }
 
-export default function RegisterPage() {
+function RegisterContent() {
     const [mode, setMode] = useState<Mode>("email");
     const [profile, setProfile] = useState<Profile>("personal");
     const [selectedCountry, setCountry] = useState(COUNTRIES[0]);
@@ -442,5 +442,13 @@ export default function RegisterPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div className={styles.page}>Carregando...</div>}>
+            <RegisterContent />
+        </Suspense>
     );
 }
