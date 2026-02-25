@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+
 import styles from "./register.module.css";
 
 // ── Translations ──────────────────────────────────────────────
@@ -99,7 +99,7 @@ function getStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
     return s as 0 | 1 | 2 | 3 | 4;
 }
 
-function RegisterContent() {
+export default function RegisterPage() {
     const [mode, setMode] = useState<Mode>("email");
     const [profile, setProfile] = useState<Profile>("personal");
     const [selectedCountry, setCountry] = useState(COUNTRIES[0]);
@@ -123,14 +123,16 @@ function RegisterContent() {
     const [success, setSuccess] = useState(false);
 
     // Pre-fill email from query param (e.g., when redirected from login)
-    const searchParams = useSearchParams();
     useEffect(() => {
-        const preEmail = searchParams.get("email");
-        if (preEmail) {
-            setEmail(preEmail);
-            setMode("email"); // switch to email mode automatically
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const preEmail = params.get("email");
+            if (preEmail) {
+                setEmail(preEmail);
+                setMode("email");
+            }
         }
-    }, [searchParams]);
+    }, []);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const langRef = useRef<HTMLDivElement>(null);
@@ -442,13 +444,5 @@ function RegisterContent() {
                 </p>
             </div>
         </div>
-    );
-}
-
-export default function RegisterPage() {
-    return (
-        <Suspense fallback={<div className={styles.page}>Carregando...</div>}>
-            <RegisterContent />
-        </Suspense>
     );
 }

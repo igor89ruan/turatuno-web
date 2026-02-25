@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
@@ -113,7 +113,7 @@ const COUNTRIES = [
 type LoginMode = "phone" | "email";
 type Theme = "dark" | "light";
 
-function LoginContent() {
+export default function LoginPage() {
     const router = useRouter();
 
     const [mode, setMode] = useState<LoginMode>("email");
@@ -465,13 +465,5 @@ function LoginContent() {
                 </p>
             </div>
         </div>
-    );
-}
-
-export default function LoginPage() {
-    return (
-        <Suspense fallback={<div className={styles.page}>Carregando...</div>}>
-            <LoginContent />
-        </Suspense>
     );
 }
