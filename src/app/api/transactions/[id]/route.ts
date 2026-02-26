@@ -20,7 +20,7 @@ async function verifyTransactionAccess(txId: string, userId: string) {
 
 export async function DELETE(
     _req: NextRequest,
-    context: { params: Promise<{ id: string }> }
+    context: any
 ) {
     const params = await context.params;
     const session = await getServerSession(authOptions);
@@ -38,7 +38,7 @@ export async function DELETE(
 
 export async function PUT(
     req: NextRequest,
-    context: { params: Promise<{ id: string }> }
+    context: any
 ) {
     const params = await context.params;
     const session = await getServerSession(authOptions);
