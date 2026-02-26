@@ -34,11 +34,13 @@ async function createWorkspaceForUser(
 
 export const authOptions: NextAuthOptions = {
     providers: [
-        // ── Google OAuth ──────────────────────────────────────────
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-        }),
+        // ── Google OAuth (only when configured) ───────────────────
+        ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+            ? [GoogleProvider({
+                clientId: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            })]
+            : []),
 
         // ── E-mail / Phone + password ─────────────────────────────
         CredentialsProvider({
