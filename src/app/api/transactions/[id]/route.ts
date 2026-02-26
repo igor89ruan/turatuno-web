@@ -20,9 +20,9 @@ async function verifyTransactionAccess(txId: string, userId: string) {
 
 export async function DELETE(
     _req: NextRequest,
-    context: any
+    context: { params: { id: string } }
 ) {
-    const params = await context.params;
+    const params = context.params;
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -38,9 +38,9 @@ export async function DELETE(
 
 export async function PUT(
     req: NextRequest,
-    context: any
+    context: { params: { id: string } }
 ) {
-    const params = await context.params;
+    const params = context.params;
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
