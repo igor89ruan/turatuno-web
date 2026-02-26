@@ -539,3 +539,216 @@
     height: 6px;
     border-radius: 1px;
 }
+
+/* ─── Empty Charts State ─── */
+.emptyCharts {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 4rem 2rem;
+    color: #52525b;
+    font-size: 0.9rem;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+/* ─── Gerenciar Gráficos Modal ─── */
+.manageOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.manageModal {
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    width: 440px;
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+    animation: slideUp 0.2s ease;
+    scrollbar-width: thin;
+    scrollbar-color: #27272a transparent;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.manageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.manageTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.manageClose {
+    background: none;
+    border: none;
+    color: #71717a;
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s;
+}
+
+.manageClose:hover {
+    color: #fff;
+}
+
+.manageSectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.manageSectionLabel {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #a1a1aa;
+}
+
+.resetBtn {
+    padding: 0.3rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #a1a1aa;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.resetBtn:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+}
+
+.manageList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.manageItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.15s;
+}
+
+.manageItemOn {
+    border-color: rgba(99, 102, 241, 0.25);
+    background: rgba(99, 102, 241, 0.06);
+}
+
+.manageIndicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #3f3f46;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.manageIndicatorOn {
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.manageLabel {
+    flex: 1;
+    font-size: 0.84rem;
+    color: #d4d4d8;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.toggleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.toggle {
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    background: #3f3f46;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.toggleOn {
+    background: #6366f1;
+}
+
+.toggleThumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+    display: block;
+}
+
+.toggleOn .toggleThumb {
+    transform: translateX(18px);
+}
+
+.toggleLabel {
+    font-size: 0.75rem;
+    color: #71717a;
+    min-width: 40px;
+}
