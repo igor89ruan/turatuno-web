@@ -18,34 +18,39 @@ async function verifyTransactionAccess(txId: string, userId: string) {
     return tx;
 }
 
+// Definimos um tipo para o contexto para facilitar
+type RouteContext = {
+    params: Promise<{ id: string }>
+};
+
 export async function DELETE(
     _req: NextRequest,
-    context: { params: { id: string } }
+    { params }: RouteContext
 ) {
-    const params = context.params;
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const userId = (session.user as { id: string }).id;
-    const tx = await verifyTransactionAccess(params.id, userId);
+    const tx = await verifyTransactionAccess(id, userId);
 
     if (!tx) return NextResponse.json({ error: "Not found or forbidden" }, { status: 404 });
 
-    await prisma.transaction.delete({ where: { id: params.id } });
+    await prisma.transaction.delete({ where: { id: id } });
 
     return NextResponse.json({ ok: true });
 }
 
 export async function PUT(
     req: NextRequest,
-    context: { params: { id: string } }
+    { params }: RouteContext
 ) {
-    const params = context.params;
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const { id } = await params;
     const userId = (session.user as { id: string }).id;
-    const tx = await verifyTransactionAccess(params.id, userId);
+    const tx = await verifyTransactionAccess(id, userId);
 
     if (!tx) return NextResponse.json({ error: "Not found or forbidden" }, { status: 404 });
 
@@ -65,7 +70,7 @@ export async function PUT(
     }
 
     const updatedTx = await prisma.transaction.update({
-        where: { id: params.id },
+        where: { id: id },
         data: {
             amount: parseFloat(String(amount)),
             type,
