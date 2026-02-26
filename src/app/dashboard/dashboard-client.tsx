@@ -23,7 +23,20 @@ interface Props { userName: string; workspace: Workspace }
 
 // ── Helpers ────────────────────────────────────────────────────
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const mask = (v: number, hide: boolean) => hide ? "••••" : fmt(v);
 const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+// ── Eye button ─────────────────────────────────────────────────
+function EyeBtn({ hidden, onToggle }: { hidden: boolean; onToggle: () => void }) {
+    return (
+        <button className={styles.statEye} onClick={onToggle} title={hidden ? "Mostrar valores" : "Esconder valores"}>
+            {hidden
+                ? <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+            }
+        </button>
+    );
+}
 
 // ── Donut chart ────────────────────────────────────────────────
 function DonutChart({ income, expense }: { income: number; expense: number }) {
@@ -68,7 +81,12 @@ export default function DashboardClient({ userName, workspace }: Props) {
     const [expandSaldo, setExpandSaldo] = useState(true);
     const [expandInc, setExpandInc] = useState(true);
     const [expandExp, setExpandExp] = useState(true);
-    const [hideValues, setHideValues] = useState(false);
+
+    // Per-card hide states
+    const [hideSaldo, setHideSaldo] = useState(false);
+    const [hideInc, setHideInc] = useState(false);
+    const [hideExp, setHideExp] = useState(false);
+    const [hideDisp, setHideDisp] = useState(false);
 
     const now = new Date();
     const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
@@ -79,10 +97,6 @@ export default function DashboardClient({ userName, workspace }: Props) {
 
     const allTxs = workspace?.transactions ?? [];
 
-    // ── Format helper (respects hide toggle) ──
-    const show = (v: number) => hideValues ? "••••" : fmt(v);
-
-    // ── Month transactions ──
     const monthTxs = useMemo(() => allTxs.filter(t => {
         const d = new Date(t.date);
         return d.getFullYear() === mYear && d.getMonth() === mMonth;
@@ -98,7 +112,6 @@ export default function DashboardClient({ userName, workspace }: Props) {
     const saldoDisp = prevBal + received - paid;
     const saldoPrev = prevBal + income - expense;
 
-    // ── Filtered transactions ──
     const filteredTxs = useMemo(() => {
         let txs = monthTxs;
         if (txTab === "receitas") txs = txs.filter(t => t.type === "income");
@@ -107,13 +120,11 @@ export default function DashboardClient({ userName, workspace }: Props) {
         return txs;
     }, [monthTxs, txTab, search]);
 
-    // ── Chart data ──
     const chartInc = chartTab === "despesas" ? 0 : income;
     const chartExp = chartTab === "receitas" ? 0 : expense;
 
     return (
         <div className={styles.page}>
-            {/* Mobile overlay */}
             {sidebarOpen && <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />}
 
             {/* ─── Sidebar ─── */}
@@ -195,15 +206,10 @@ export default function DashboardClient({ userName, workspace }: Props) {
                         <div className={styles.statCardTop}>
                             <div>
                                 <p className={styles.statLabel}>↗ Saldo Do Período Anterior</p>
-                                <p className={styles.statValue} style={{ color: prevBal >= 0 ? "#22c55e" : "#ef4444" }}>{show(prevBal)}</p>
+                                <p className={styles.statValue} style={{ color: prevBal >= 0 ? "#22c55e" : "#ef4444" }}>{mask(prevBal, hideSaldo)}</p>
                                 <p className={styles.statSub}>Até 31 De {MONTHS[mMonth === 0 ? 11 : mMonth - 1]}</p>
                             </div>
-                            <button className={styles.statEye} onClick={() => setHideValues(v => !v)} title={hideValues ? "Mostrar valores" : "Esconder valores"}>
-                                {hideValues
-                                    ? <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
-                                    : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                                }
-                            </button>
+                            <EyeBtn hidden={hideSaldo} onToggle={() => setHideSaldo(v => !v)} />
                         </div>
                         <button className={styles.detailToggle} onClick={() => setExpandSaldo(v => !v)}>
                             Ocultar detalhes {expandSaldo ? "∧" : "∨"}
@@ -212,11 +218,11 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.statSubRow}>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>⏳ Pendentes</span>
-                                    <span className={styles.subVal}>{show(prevBal < 0 ? Math.abs(prevBal) : 0)}</span>
+                                    <span className={styles.subVal}>{mask(prevBal < 0 ? Math.abs(prevBal) : 0, hideSaldo)}</span>
                                 </div>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>✅ Disponível</span>
-                                    <span className={styles.subVal}>{show(prevBal)}</span>
+                                    <span className={styles.subVal}>{mask(prevBal, hideSaldo)}</span>
                                 </div>
                             </div>
                         )}
@@ -227,12 +233,10 @@ export default function DashboardClient({ userName, workspace }: Props) {
                         <div className={styles.statCardTop}>
                             <div>
                                 <p className={styles.statLabel}>↗ Receitas</p>
-                                <p className={styles.statValue} style={{ color: "#22c55e" }}>{show(income)}</p>
+                                <p className={styles.statValue} style={{ color: "#22c55e" }}>{mask(income, hideInc)}</p>
                                 <p className={styles.statSub}>1 De {monthName} - {lastDay} De {monthName}</p>
                             </div>
-                            <button className={styles.statEye}>
-                                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                            </button>
+                            <EyeBtn hidden={hideInc} onToggle={() => setHideInc(v => !v)} />
                         </div>
                         <button className={styles.detailToggle} onClick={() => setExpandInc(v => !v)}>
                             Ocultar detalhes {expandInc ? "∧" : "∨"}
@@ -241,11 +245,11 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.statSubRow}>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>✅ Recebeu</span>
-                                    <span className={styles.subVal} style={{ color: "#22c55e" }}>{show(received)}</span>
+                                    <span className={styles.subVal} style={{ color: "#22c55e" }}>{mask(received, hideInc)}</span>
                                 </div>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>⏳ A receber</span>
-                                    <span className={styles.subVal}>{show(toReceive)}</span>
+                                    <span className={styles.subVal}>{mask(toReceive, hideInc)}</span>
                                 </div>
                             </div>
                         )}
@@ -256,12 +260,10 @@ export default function DashboardClient({ userName, workspace }: Props) {
                         <div className={styles.statCardTop}>
                             <div>
                                 <p className={styles.statLabel}>↘ Despesas</p>
-                                <p className={styles.statValue} style={{ color: "#ef4444" }}>- {show(expense)}</p>
+                                <p className={styles.statValue} style={{ color: "#ef4444" }}>- {mask(expense, hideExp)}</p>
                                 <p className={styles.statSub}>1 De {monthName} - {lastDay} De {monthName}</p>
                             </div>
-                            <button className={styles.statEye}>
-                                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                            </button>
+                            <EyeBtn hidden={hideExp} onToggle={() => setHideExp(v => !v)} />
                         </div>
                         <button className={styles.detailToggle} onClick={() => setExpandExp(v => !v)}>
                             Ocultar detalhes {expandExp ? "∧" : "∨"}
@@ -270,11 +272,11 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.statSubRow}>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>✅ Pago</span>
-                                    <span className={styles.subVal}>{show(paid)}</span>
+                                    <span className={styles.subVal}>{mask(paid, hideExp)}</span>
                                 </div>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>⏳ A pagar</span>
-                                    <span className={styles.subVal} style={{ color: "#ef4444" }}>{show(toPay)}</span>
+                                    <span className={styles.subVal} style={{ color: "#ef4444" }}>{mask(toPay, hideExp)}</span>
                                 </div>
                             </div>
                         )}
@@ -282,14 +284,17 @@ export default function DashboardClient({ userName, workspace }: Props) {
 
                     {/* Saldo Disponível + Previsto */}
                     <div className={`${styles.statCard} ${styles.statCardDouble}`}>
-                        <div>
-                            <p className={styles.statLabel}>↗ Saldo Disponível</p>
-                            <p className={styles.statValue} style={{ color: saldoDisp >= 0 ? "#22c55e" : "#ef4444" }}>{show(saldoDisp)}</p>
-                            <p className={styles.statSub}>Até {lastDay} De {monthName} (Receita - Despesas + Saldo Bancário)</p>
+                        <div className={styles.statCardTop}>
+                            <div>
+                                <p className={styles.statLabel}>↗ Saldo Disponível</p>
+                                <p className={styles.statValue} style={{ color: saldoDisp >= 0 ? "#22c55e" : "#ef4444" }}>{mask(saldoDisp, hideDisp)}</p>
+                                <p className={styles.statSub}>Até {lastDay} De {monthName} (Receita - Despesas + Saldo Bancário)</p>
+                            </div>
+                            <EyeBtn hidden={hideDisp} onToggle={() => setHideDisp(v => !v)} />
                         </div>
                         <div style={{ marginTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "0.75rem" }}>
                             <p className={styles.statLabel}>↗ Saldo Previsto</p>
-                            <p className={styles.statValue} style={{ color: saldoPrev >= 0 ? "#22c55e" : "#ef4444" }}>{show(saldoPrev)}</p>
+                            <p className={styles.statValue} style={{ color: saldoPrev >= 0 ? "#22c55e" : "#ef4444" }}>{mask(saldoPrev, hideDisp)}</p>
                             <p className={styles.statSub}>Até {lastDay} De {monthName} (Receitas - Despesas + Saldo Bancário)</p>
                         </div>
                     </div>
@@ -307,24 +312,18 @@ export default function DashboardClient({ userName, workspace }: Props) {
                                 <button className={styles.navArrow} onClick={() => setMonthOffset(o => o + 1)}>›</button>
                             </div>
                             <div className={styles.txBtns}>
-                                <button className={styles.addIncBtn} onClick={() => setModal("income")}>
-                                    + Receita
-                                </button>
-                                <button className={styles.addExpBtn} onClick={() => setModal("expense")}>
-                                    + Despesa
-                                </button>
+                                <button className={styles.addIncBtn} onClick={() => setModal("income")}>+ Receita</button>
+                                <button className={styles.addExpBtn} onClick={() => setModal("expense")}>+ Despesa</button>
                             </div>
                         </div>
 
-                        {/* Tabs */}
                         <div className={styles.txTabs}>
-                            {([["todas", "Todas"], ["receitas", "Receitas"], ["despesas", "Despesas"]] as const).map(([k, l]) => (
+                            {(([["todas", "Todas"], ["receitas", "Receitas"], ["despesas", "Despesas"]] as const)).map(([k, l]) => (
                                 <button key={k} className={`${styles.txTab} ${txTab === k ? styles.txTabActive : ""}`}
                                     onClick={() => setTxTab(k)}>{l}</button>
                             ))}
                         </div>
 
-                        {/* Search */}
                         <div className={styles.searchRow}>
                             <div className={styles.searchWrap}>
                                 <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className={styles.searchIcon}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
@@ -334,7 +333,6 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.searchDateLabel}>Data de Vencimento</div>
                         </div>
 
-                        {/* Transactions */}
                         <div className={styles.txList}>
                             {filteredTxs.length === 0 ? (
                                 <p className={styles.emptyText}>Nenhuma transação encontrada.</p>
@@ -365,9 +363,7 @@ export default function DashboardClient({ userName, workspace }: Props) {
                                             <p className={tx.type === "income" ? styles.txInc : styles.txExp}>
                                                 {tx.type === "income" ? "+" : "-"} {fmt(Math.abs(tx.amount))}
                                             </p>
-                                            <p className={styles.txDate}>
-                                                {new Date(tx.date).toLocaleDateString("pt-BR")}
-                                            </p>
+                                            <p className={styles.txDate}>{new Date(tx.date).toLocaleDateString("pt-BR")}</p>
                                         </div>
                                     </div>
                                 ))
@@ -379,7 +375,7 @@ export default function DashboardClient({ userName, workspace }: Props) {
                     <div className={styles.chartPanel}>
                         <h3 className={styles.chartPanelTitle}>Gráficos</h3>
                         <div className={styles.chartTabs}>
-                            {([["todas", "Todas"], ["receitas", "Receitas"], ["despesas", "Despesas"]] as const).map(([k, l]) => (
+                            {(([["todas", "Todas"], ["receitas", "Receitas"], ["despesas", "Despesas"]] as const)).map(([k, l]) => (
                                 <button key={k} className={`${styles.chartTab} ${chartTab === k ? styles.chartTabActive : ""}`}
                                     onClick={() => setChartTab(k)}>{l}</button>
                             ))}
