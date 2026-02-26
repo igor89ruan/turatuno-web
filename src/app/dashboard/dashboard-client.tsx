@@ -23,27 +23,93 @@ interface Props { userName: string; workspace: Workspace }
 
 // ── Helpers ────────────────────────────────────────────────────
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
+// ── Donut chart ────────────────────────────────────────────────
+function DonutChart({ income, expense }: { income: number; expense: number }) {
+    const total = income + expense || 1;
+    const r = 60;
+    const circ = 2 * Math.PI * r;
+    const incSlice = (income / total) * circ;
+    const expSlice = (expense / total) * circ;
+
+    return (
+        <svg width="160" height="160" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r={r} fill="none" stroke="#1e1e2e" strokeWidth="24" />
+            {expense > 0 && (
+                <circle cx="80" cy="80" r={r} fill="none" stroke="#ef4444" strokeWidth="24"
+                    strokeDasharray={`${expSlice} ${circ}`} strokeDashoffset={0}
+                    transform="rotate(-90 80 80)" style={{ transition: "all 0.6s" }} />
+            )}
+            {income > 0 && (
+                <circle cx="80" cy="80" r={r} fill="none" stroke="#22c55e" strokeWidth="24"
+                    strokeDasharray={`${incSlice} ${circ}`}
+                    strokeDashoffset={expense > 0 ? -expSlice : 0}
+                    transform="rotate(-90 80 80)" style={{ transition: "all 0.6s" }} />
+            )}
+            <text x="80" y="76" textAnchor="middle" fontSize="11" fontWeight="700" fill="#fff">
+                {fmt(income - expense)}
+            </text>
+            <text x="80" y="92" textAnchor="middle" fontSize="9" fill="#71717a">Total</text>
+        </svg>
+    );
+}
+
+// ── Main Component ─────────────────────────────────────────────
 export default function DashboardClient({ userName, workspace }: Props) {
     const router = useRouter();
     const [modal, setModal] = useState<"income" | "expense" | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [monthOffset, setMonthOffset] = useState(0);
+    const [activeFilter, setActiveFilter] = useState<"hoje" | "7dias" | "mes" | "ano">("mes");
+    const [txTab, setTxTab] = useState<"todas" | "receitas" | "despesas">("todas");
+    const [chartTab, setChartTab] = useState<"todas" | "receitas" | "despesas">("todas");
+    const [search, setSearch] = useState("");
+    const [expandSaldo, setExpandSaldo] = useState(true);
+    const [expandInc, setExpandInc] = useState(true);
+    const [expandExp, setExpandExp] = useState(true);
 
-    // Derived Financials
+    const now = new Date();
+    const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+    const mYear = viewDate.getFullYear();
+    const mMonth = viewDate.getMonth();
+    const monthName = MONTHS[mMonth];
+    const lastDay = new Date(mYear, mMonth + 1, 0).getDate();
+
     const allTxs = workspace?.transactions ?? [];
-    const income = allTxs.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
-    const expense = allTxs.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-    const prevBal = workspace?.accounts.reduce((s, a) => s + a.balance, 0) ?? 0;
-    const totalBalance = prevBal + income - expense;
 
-    // Last transactions
-    const latestTxs = useMemo(() => {
-        return allTxs.slice(0, 5); // take max 5
-    }, [allTxs]);
+    // ── Month transactions ──
+    const monthTxs = useMemo(() => allTxs.filter(t => {
+        const d = new Date(t.date);
+        return d.getFullYear() === mYear && d.getMonth() === mMonth;
+    }), [allTxs, mYear, mMonth]);
+
+    const income = monthTxs.filter(t => t.type === "income").reduce((s, t) => s + Math.abs(t.amount), 0);
+    const expense = monthTxs.filter(t => t.type === "expense").reduce((s, t) => s + Math.abs(t.amount), 0);
+    const received = monthTxs.filter(t => t.type === "income" && t.status === "paid").reduce((s, t) => s + Math.abs(t.amount), 0);
+    const toReceive = income - received;
+    const paid = monthTxs.filter(t => t.type === "expense" && t.status === "paid").reduce((s, t) => s + Math.abs(t.amount), 0);
+    const toPay = expense - paid;
+    const prevBal = workspace?.accounts.reduce((s, a) => s + a.balance, 0) ?? 0;
+    const saldoDisp = prevBal + received - paid;
+    const saldoPrev = prevBal + income - expense;
+
+    // ── Filtered transactions ──
+    const filteredTxs = useMemo(() => {
+        let txs = monthTxs;
+        if (txTab === "receitas") txs = txs.filter(t => t.type === "income");
+        if (txTab === "despesas") txs = txs.filter(t => t.type === "expense");
+        if (search.trim()) txs = txs.filter(t => t.description.toLowerCase().includes(search.toLowerCase()));
+        return txs;
+    }, [monthTxs, txTab, search]);
+
+    // ── Chart data ──
+    const chartInc = chartTab === "despesas" ? 0 : income;
+    const chartExp = chartTab === "receitas" ? 0 : expense;
 
     return (
         <div className={styles.page}>
-            {/* ─── Mobile sidebar overlay ─── */}
+            {/* Mobile overlay */}
             {sidebarOpen && <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />}
 
             {/* ─── Sidebar ─── */}
@@ -51,9 +117,7 @@ export default function DashboardClient({ userName, workspace }: Props) {
                 <div className={styles.sidebarBrand}>
                     <span className={styles.brandDot} />
                     <span className={styles.brandName}>TuraTuno</span>
-                    <button className={styles.sidebarCloseBtn} onClick={() => setSidebarOpen(false)} title="Fechar menu">
-                        ✕
-                    </button>
+                    <button className={styles.sidebarCloseBtn} onClick={() => setSidebarOpen(false)}>✕</button>
                 </div>
                 <nav className={styles.nav}>
                     {[
@@ -84,114 +148,248 @@ export default function DashboardClient({ userName, workspace }: Props) {
                 </div>
             </aside>
 
-            {/* ─── Main Content ─── */}
+            {/* ─── Main ─── */}
             <main className={styles.main}>
-                <header className={styles.header}>
-                    <button className={styles.hamburger} onClick={() => setSidebarOpen(true)} title="Abrir menu">
+
+                {/* Filter Toolbar */}
+                <header className={styles.toolbar}>
+                    <button className={styles.hamburger} onClick={() => setSidebarOpen(true)}>
                         <span /><span /><span />
                     </button>
-                    <h1 className={styles.pageTitle}>Dashboard</h1>
-                    <div className="user-profiles" style={{ display: "flex", gap: "0.5rem" }}>
-                        <div className={styles.headerAvatar} title={userName}>{userName[0]}</div>
-                        <div className={styles.headerAvatar} style={{ background: "#6366f1" }} title="Sócio">S</div>
+                    <div className={styles.monthNav}>
+                        <button className={styles.navArrow} onClick={() => setMonthOffset(o => o - 1)}>‹</button>
+                        <span className={styles.monthLabel}>{monthName}</span>
+                        <button className={styles.navArrow} onClick={() => setMonthOffset(o => o + 1)}>›</button>
+                    </div>
+                    <div className={styles.filterBtns}>
+                        {(([["hoje", "Hoje"], ["7dias", "7 dias atrás"], ["mes", "Esse mês"], ["ano", "Esse ano"]] as const)).map(([k, l]) => (
+                            <button key={k} className={`${styles.filterBtn} ${activeFilter === k ? styles.filterActive : ""}`}
+                                onClick={() => setActiveFilter(k)}>{l}</button>
+                        ))}
+                    </div>
+                    <div className={styles.dateRange}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                        <span>01/{String(mMonth + 1).padStart(2, "0")}/{mYear} – {lastDay}/{String(mMonth + 1).padStart(2, "0")}/{mYear}</span>
+                    </div>
+                    <div className={styles.toolbarActions}>
+                        <button className={styles.actionBtn} onClick={() => { setMonthOffset(0); setActiveFilter("mes"); }}>
+                            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-2 14H7L5 6" /></svg>
+                            Limpar filtro
+                        </button>
+                        <button className={styles.actionBtn} onClick={() => router.refresh()}>
+                            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-.36-5.29" /></svg>
+                            Atualizar
+                        </button>
                     </div>
                 </header>
 
-                <div className={styles.grid}>
-                    <div className={styles.leftCol}>
-                        {/* ─── Saldo Card ─── */}
-                        <div className={`${styles.card} ${styles.saldoCard}`}>
-                            <p className={styles.saldoLabel}>Saldo Total Compartilhado</p>
-                            <h2 className={styles.saldoValue}>{fmt(totalBalance)}</h2>
+                {/* ─── 4 Stat Cards ─── */}
+                <div className={styles.statsRow}>
 
-                            <div className={styles.saldoFoot}>
-                                <div>
-                                    <p className={styles.sfLabel}>Receitas (Mês)</p>
-                                    <p className={styles.sfInc}>+ {fmt(income)}</p>
+                    {/* Saldo do Período Anterior */}
+                    <div className={`${styles.statCard} ${styles.statCardBlue}`}>
+                        <div className={styles.statCardTop}>
+                            <div>
+                                <p className={styles.statLabel}>↗ Saldo Do Período Anterior</p>
+                                <p className={styles.statValue} style={{ color: prevBal >= 0 ? "#22c55e" : "#ef4444" }}>{fmt(prevBal)}</p>
+                                <p className={styles.statSub}>Até 31 De {MONTHS[mMonth === 0 ? 11 : mMonth - 1]}</p>
+                            </div>
+                            <button className={styles.statEye}>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                            </button>
+                        </div>
+                        <button className={styles.detailToggle} onClick={() => setExpandSaldo(v => !v)}>
+                            Ocultar detalhes {expandSaldo ? "∧" : "∨"}
+                        </button>
+                        {expandSaldo && (
+                            <div className={styles.statSubRow}>
+                                <div className={styles.subItem}>
+                                    <span className={styles.subLabel}>⏳ Pendentes</span>
+                                    <span className={styles.subVal}>{fmt(prevBal < 0 ? Math.abs(prevBal) : 0)}</span>
                                 </div>
-                                <div>
-                                    <p className={styles.sfLabel}>Despesas (Mês)</p>
-                                    <p className={styles.sfExp}>- {fmt(expense)}</p>
+                                <div className={styles.subItem}>
+                                    <span className={styles.subLabel}>✅ Disponível</span>
+                                    <span className={styles.subVal}>{fmt(prevBal)}</span>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* ─── Movimentações ─── */}
-                        <div className={styles.card}>
-                            <h3 className={styles.cardTitle}>Últimas Movimentações</h3>
-
-                            {latestTxs.length === 0 ? (
-                                <p className={styles.emptyText}>Nenhuma movimentação recente.</p>
-                            ) : (
-                                <div className={styles.txList}>
-                                    {latestTxs.map(tx => (
-                                        <div key={tx.id} className={styles.txRow}>
-                                            <div className={styles.txLeft}>
-                                                <div className={styles.txIcon} style={{ background: `${tx.category?.colorHex || (tx.type === "income" ? "#22c55e" : "#ef4444")}20` }}>
-                                                    {tx.category?.icon || (tx.type === "income" ? "💰" : "🍔")}
-                                                </div>
-                                                <div>
-                                                    <p className={styles.txName}>{tx.description}</p>
-                                                    <p className={styles.txMeta}>
-                                                        {tx.category?.name || "Outros"} • Cartão Nubank
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className={styles.txRight}>
-                                                <p className={tx.type === "income" ? styles.txInc : styles.txExp}>
-                                                    {tx.type === "income" ? "+" : "-"} {fmt(Math.abs(tx.amount))}
-                                                </p>
-                                                <p className={styles.txUser}>{tx.user.name}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        )}
                     </div>
 
-                    <div className={styles.rightCol}>
-                        {/* ─── Cartões de Crédito ─── */}
-                        <div className={styles.card}>
-                            <h3 className={styles.cardTitle}>Cartões de Crédito</h3>
-
-                            <div className={styles.ccList}>
-                                {/* Nubank */}
-                                <div className={styles.ccItem}>
-                                    <div className={styles.ccHeader}>
-                                        <div className={styles.ccName}><span style={{ color: "#8b5cf6" }}>●</span> Nubank</div>
-                                        <div className={styles.ccBadge}>Fatura Aberta</div>
-                                    </div>
-                                    <div className={styles.ccTrack}>
-                                        <div className={styles.ccFill} style={{ width: "65%", background: "#8b5cf6" }} />
-                                    </div>
-                                    <div className={styles.ccFoot}>
-                                        <span>Limite: R$ 5.000,00</span>
-                                        <span>Usado: R$ 3.250,00</span>
-                                    </div>
+                    {/* Receitas */}
+                    <div className={`${styles.statCard} ${styles.statCardGreen}`}>
+                        <div className={styles.statCardTop}>
+                            <div>
+                                <p className={styles.statLabel}>↗ Receitas</p>
+                                <p className={styles.statValue} style={{ color: "#22c55e" }}>{fmt(income)}</p>
+                                <p className={styles.statSub}>1 De {monthName} - {lastDay} De {monthName}</p>
+                            </div>
+                            <button className={styles.statEye}>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                            </button>
+                        </div>
+                        <button className={styles.detailToggle} onClick={() => setExpandInc(v => !v)}>
+                            Ocultar detalhes {expandInc ? "∧" : "∨"}
+                        </button>
+                        {expandInc && (
+                            <div className={styles.statSubRow}>
+                                <div className={styles.subItem}>
+                                    <span className={styles.subLabel}>✅ Recebeu</span>
+                                    <span className={styles.subVal} style={{ color: "#22c55e" }}>{fmt(received)}</span>
                                 </div>
-
-                                {/* Itaú */}
-                                <div className={styles.ccItem}>
-                                    <div className={styles.ccHeader}>
-                                        <div className={styles.ccName}><span style={{ color: "#f97316" }}>●</span> Itaú Black</div>
-                                        <div className={styles.ccBadge} style={{ color: "#22c55e", background: "rgba(34,197,94,0.1)" }}>Fatura Paga</div>
-                                    </div>
-                                    <div className={styles.ccTrack}>
-                                        <div className={styles.ccFill} style={{ width: "15%", background: "#4f46e5" }} />
-                                    </div>
-                                    <div className={styles.ccFoot}>
-                                        <span>Limite: R$ 15.000,00</span>
-                                        <span>Usado: R$ 2.250,00</span>
-                                    </div>
+                                <div className={styles.subItem}>
+                                    <span className={styles.subLabel}>⏳ A receber</span>
+                                    <span className={styles.subVal}>{fmt(toReceive)}</span>
                                 </div>
                             </div>
+                        )}
+                    </div>
+
+                    {/* Despesas */}
+                    <div className={`${styles.statCard} ${styles.statCardRed}`}>
+                        <div className={styles.statCardTop}>
+                            <div>
+                                <p className={styles.statLabel}>↘ Despesas</p>
+                                <p className={styles.statValue} style={{ color: "#ef4444" }}>- {fmt(expense)}</p>
+                                <p className={styles.statSub}>1 De {monthName} - {lastDay} De {monthName}</p>
+                            </div>
+                            <button className={styles.statEye}>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                            </button>
+                        </div>
+                        <button className={styles.detailToggle} onClick={() => setExpandExp(v => !v)}>
+                            Ocultar detalhes {expandExp ? "∧" : "∨"}
+                        </button>
+                        {expandExp && (
+                            <div className={styles.statSubRow}>
+                                <div className={styles.subItem}>
+                                    <span className={styles.subLabel}>✅ Pago</span>
+                                    <span className={styles.subVal}>{fmt(paid)}</span>
+                                </div>
+                                <div className={styles.subItem}>
+                                    <span className={styles.subLabel}>⏳ A pagar</span>
+                                    <span className={styles.subVal} style={{ color: "#ef4444" }}>{fmt(toPay)}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Saldo Disponível + Previsto */}
+                    <div className={`${styles.statCard} ${styles.statCardDouble}`}>
+                        <div>
+                            <p className={styles.statLabel}>↗ Saldo Disponível</p>
+                            <p className={styles.statValue} style={{ color: saldoDisp >= 0 ? "#22c55e" : "#ef4444" }}>{fmt(saldoDisp)}</p>
+                            <p className={styles.statSub}>Até {lastDay} De {monthName} (Receita - Despesas + Saldo Bancário)</p>
+                        </div>
+                        <div style={{ marginTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "0.75rem" }}>
+                            <p className={styles.statLabel}>↗ Saldo Previsto</p>
+                            <p className={styles.statValue} style={{ color: saldoPrev >= 0 ? "#22c55e" : "#ef4444" }}>{fmt(saldoPrev)}</p>
+                            <p className={styles.statSub}>Até {lastDay} De {monthName} (Receitas - Despesas + Saldo Bancário)</p>
                         </div>
                     </div>
                 </div>
 
-                {/* FAB */}
-                <button className={styles.fab} onClick={() => setModal("income")}>+</button>
+                {/* ─── Bottom Section ─── */}
+                <div className={styles.bottomRow}>
+
+                    {/* Transaction List */}
+                    <div className={styles.txPanel}>
+                        <div className={styles.txPanelTop}>
+                            <div className={styles.txMonthNav}>
+                                <button className={styles.navArrow} onClick={() => setMonthOffset(o => o - 1)}>‹</button>
+                                <span className={styles.monthLabel}>{monthName}</span>
+                                <button className={styles.navArrow} onClick={() => setMonthOffset(o => o + 1)}>›</button>
+                            </div>
+                            <div className={styles.txBtns}>
+                                <button className={styles.addIncBtn} onClick={() => setModal("income")}>
+                                    + Receita
+                                </button>
+                                <button className={styles.addExpBtn} onClick={() => setModal("expense")}>
+                                    + Despesa
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className={styles.txTabs}>
+                            {([["todas", "Todas"], ["receitas", "Receitas"], ["despesas", "Despesas"]] as const).map(([k, l]) => (
+                                <button key={k} className={`${styles.txTab} ${txTab === k ? styles.txTabActive : ""}`}
+                                    onClick={() => setTxTab(k)}>{l}</button>
+                            ))}
+                        </div>
+
+                        {/* Search */}
+                        <div className={styles.searchRow}>
+                            <div className={styles.searchWrap}>
+                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className={styles.searchIcon}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                <input className={styles.searchInput} placeholder="Pesquisar transações..."
+                                    value={search} onChange={e => setSearch(e.target.value)} />
+                            </div>
+                            <div className={styles.searchDateLabel}>Data de Vencimento</div>
+                        </div>
+
+                        {/* Transactions */}
+                        <div className={styles.txList}>
+                            {filteredTxs.length === 0 ? (
+                                <p className={styles.emptyText}>Nenhuma transação encontrada.</p>
+                            ) : (
+                                filteredTxs.map(tx => (
+                                    <div key={tx.id} className={styles.txRow}>
+                                        <div className={styles.txLeft}>
+                                            <div className={styles.txIcon} style={{ background: `${tx.category?.colorHex || (tx.type === "income" ? "#22c55e" : "#ef4444")}22` }}>
+                                                {tx.category?.icon || (tx.type === "income" ? "💰" : "💸")}
+                                            </div>
+                                            <div>
+                                                <p className={styles.txName}>{tx.description}</p>
+                                                <div className={styles.txTags}>
+                                                    {tx.status && (
+                                                        <span className={`${styles.tag} ${tx.status === "paid" ? styles.tagPaid : styles.tagPending}`}>
+                                                            {tx.status === "paid" ? "Pago" : "Pendente"}
+                                                        </span>
+                                                    )}
+                                                    {tx.category && (
+                                                        <span className={styles.tag} style={{ background: `${tx.category.colorHex}22`, color: tx.category.colorHex, borderColor: `${tx.category.colorHex}44` }}>
+                                                            {tx.category.name}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={styles.txRight}>
+                                            <p className={tx.type === "income" ? styles.txInc : styles.txExp}>
+                                                {tx.type === "income" ? "+" : "-"} {fmt(Math.abs(tx.amount))}
+                                            </p>
+                                            <p className={styles.txDate}>
+                                                {new Date(tx.date).toLocaleDateString("pt-BR")}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Chart Panel */}
+                    <div className={styles.chartPanel}>
+                        <h3 className={styles.chartPanelTitle}>Gráficos</h3>
+                        <div className={styles.chartTabs}>
+                            {([["todas", "Todas"], ["receitas", "Receitas"], ["despesas", "Despesas"]] as const).map(([k, l]) => (
+                                <button key={k} className={`${styles.chartTab} ${chartTab === k ? styles.chartTabActive : ""}`}
+                                    onClick={() => setChartTab(k)}>{l}</button>
+                            ))}
+                        </div>
+                        <p className={styles.chartSub}>
+                            {chartTab === "todas" ? "Todas Receitas e Despesas" : chartTab === "receitas" ? "Receitas por Categoria" : "Despesas por Categoria"}
+                        </p>
+                        <p className={styles.chartPeriod}>1 {monthName.substring(0, 3)} - {lastDay} {monthName.substring(0, 3)}</p>
+                        <div className={styles.donutWrap}>
+                            <DonutChart income={chartInc} expense={chartExp} />
+                        </div>
+                        <div className={styles.chartLegend}>
+                            <span className={styles.legendItem}><span className={styles.legendDot} style={{ background: "#22c55e" }} /> Receitas {fmt(chartInc)}</span>
+                            <span className={styles.legendItem}><span className={styles.legendDot} style={{ background: "#ef4444" }} /> Despesas {fmt(chartExp)}</span>
+                        </div>
+                    </div>
+                </div>
 
             </main>
 
