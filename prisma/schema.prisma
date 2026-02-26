@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model comments {
+  id      Int    @id @default(autoincrement())
+  comment String
+}
+
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String?         @unique
+  phone          String?         @unique
+  password       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  transactions   Transaction[]
+  workspaceUsers WorkspaceUser[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id              String          @id @default(cuid())
+  name            String
+  profileType     String          @default("personal")
+  defaultCurrency String          @default("BRL")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  accounts        Account[]
+  categories      Category[]
+  creditCards     CreditCard[]
+  transactions    Transaction[]
+  members         WorkspaceUser[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceUser {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String    @default("member")
+  joinedAt    DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_users")
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  name         String
+  type         String        @default("checking")
+  balance      Float         @default(0)
+  color        String        @default("#6366f1")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creditCards  CreditCard[]
+  transactions Transaction[]
+
+  @@map("accounts")
+}
+
+model CreditCard {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  accountId    String?
+  name         String
+  limit        Float
+  closingDay   Int
+  dueDay       Int
+  color        String        @default("#8b5cf6")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  account      Account?      @relation(fields: [accountId], references: [id])
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("credit_cards")
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  name         String
+  type         String        @default("expense")
+  icon         String        @default("💰")
+  colorHex     String        @default("#6366f1")
+  createdAt    DateTime      @default(now())
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id           String      @id @default(cuid())
+  workspaceId  String
+  accountId    String?
+  creditCardId String?
+  categoryId   String?
+  userId       String
+  amount       Float
+  type         String
+  description  String
+  date         DateTime    @default(now())
+  status       String      @default("paid")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  account      Account?    @relation(fields: [accountId], references: [id])
+  category     Category?   @relation(fields: [categoryId], references: [id])
+  creditCard   CreditCard? @relation(fields: [creditCardId], references: [id])
+  user         User        @relation(fields: [userId], references: [id])
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+

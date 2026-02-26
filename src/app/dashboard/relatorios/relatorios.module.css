@@ -1,0 +1,541 @@
+.page {
+    display: flex;
+    min-height: 100vh;
+    background: #0a0a0f;
+    font-family: inherit;
+    color: #e4e4e7;
+}
+
+/* ─── Reuse Sidebar & Top Nav styles from dashboard ─── */
+.sidebar {
+    width: 210px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: rgba(8, 8, 14, 0.95);
+    border-right: 1px solid rgba(99, 102, 241, 0.1);
+    padding: 1.5rem 0.75rem 1rem;
+}
+
+.sidebarBrand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
+}
+
+.brandDot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #6366f1;
+    box-shadow: 0 0 8px #6366f1;
+}
+
+.brandName {
+    font-size: 1.05rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a5b4fc, #6366f1, #06b6d4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex: 1;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #52525b;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.navItem:hover {
+    background: rgba(99, 102, 241, 0.08);
+    color: #a1a1aa;
+}
+
+.navActive {
+    background: rgba(99, 102, 241, 0.14) !important;
+    color: #818cf8 !important;
+}
+
+.navIcon {
+    font-size: 0.95rem;
+    width: 18px;
+    text-align: center;
+}
+
+.sidebarUser {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 0.5rem;
+}
+
+.userAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #06b6d4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.userInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.userName {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #e4e4e7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.userRole {
+    font-size: 0.72rem;
+    color: #52525b;
+}
+
+.logoutIcon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #52525b;
+    padding: 0.25rem;
+    border-radius: 6px;
+    display: flex;
+    transition: color 0.15s;
+}
+
+.logoutIcon:hover {
+    color: #ef4444;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* ─── Global Tabs (Top layer) ─── */
+.globalTabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+}
+
+.globalTab {
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    background: transparent;
+    border: none;
+    color: #71717a;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.globalTab:hover {
+    color: #e4e4e7;
+}
+
+.globalTabActive {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Top Nav (Filter Toolbar) ─── */
+.topNav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin: 0 1.5rem;
+    flex-wrap: wrap;
+}
+
+.monthNav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.monthLabel {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    min-width: 100px;
+    text-align: center;
+}
+
+.navArrow {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: #a1a1aa;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.15s;
+}
+
+.navArrow:hover {
+    background: rgba(99, 102, 241, 0.12);
+    color: #fff;
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.filterBtns {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.filterBtn {
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+    color: #71717a;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filterBtn:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #a1a1aa;
+}
+
+.filterActive {
+    background: #1e1b4b !important;
+    color: #fff !important;
+    border-color: #4f46e5 !important;
+}
+
+.dateRange {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+    color: #71717a;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.topActions {
+    display: flex;
+    gap: 0.4rem;
+    margin-left: auto;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+    color: #71717a;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.actionBtn:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #a1a1aa;
+}
+
+/* ─── Content ─── */
+.contentWrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #27272a transparent;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.pageTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.pageSub {
+    font-size: 0.85rem;
+    color: #71717a;
+    margin-top: 0.2rem;
+}
+
+.manageChartsBtn {
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: #e4e4e7;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.manageChartsBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Grid ─── */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 1.25rem;
+}
+
+.chartCard {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.span2 {
+    grid-column: span 2;
+}
+
+.cardTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cardTitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cardSubTitle {
+    font-size: 0.75rem;
+    color: #71717a;
+    margin-top: 0.2rem;
+}
+
+.cardDate {
+    font-size: 0.75rem;
+    color: #71717a;
+    margin-top: 0.2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.dragHandle {
+    background: none;
+    border: none;
+    color: #52525b;
+    font-size: 1rem;
+    cursor: grab;
+    padding: 0;
+    line-height: 1;
+}
+
+.donutContainer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.donutSvg {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+.detailsList {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detailsTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #e4e4e7;
+    margin-bottom: 0.2rem;
+}
+
+.emptyText {
+    font-size: 0.8rem;
+    color: #52525b;
+    font-style: italic;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.detailRow:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detailLabel {
+    display: flex;
+    align-items: center;
+}
+
+.detailBadge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.detailValueBox {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.detailAmount {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #e4e4e7;
+}
+
+.detailPct {
+    font-size: 0.75rem;
+    color: #71717a;
+    min-width: 45px;
+    text-align: right;
+}
+
+/* ─── Bar Chart ─── */
+.chartControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chartSelect {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0.35rem 2rem 0.35rem 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #e4e4e7;
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.chartSelect option {
+    background: #18181b;
+}
+
+.selectWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.selectWrap::after {
+    content: "▼";
+    position: absolute;
+    right: 0.6rem;
+    font-size: 0.6rem;
+    color: #71717a;
+    pointer-events: none;
+}
+
+.barChartContainer {
+    margin-top: 1.5rem;
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.barLegend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: #a1a1aa;
+    font-weight: 500;
+}
+
+.legendDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+}
