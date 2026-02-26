@@ -27,6 +27,7 @@ const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 export default function DashboardClient({ userName, workspace }: Props) {
     const router = useRouter();
     const [modal, setModal] = useState<"income" | "expense" | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Derived Financials
     const allTxs = workspace?.transactions ?? [];
@@ -42,11 +43,17 @@ export default function DashboardClient({ userName, workspace }: Props) {
 
     return (
         <div className={styles.page}>
+            {/* ─── Mobile sidebar overlay ─── */}
+            {sidebarOpen && <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />}
+
             {/* ─── Sidebar ─── */}
-            <aside className={styles.sidebar}>
+            <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
                 <div className={styles.sidebarBrand}>
                     <span className={styles.brandDot} />
                     <span className={styles.brandName}>TuraTuno</span>
+                    <button className={styles.sidebarCloseBtn} onClick={() => setSidebarOpen(false)} title="Fechar menu">
+                        ✕
+                    </button>
                 </div>
                 <nav className={styles.nav}>
                     {[
@@ -80,6 +87,9 @@ export default function DashboardClient({ userName, workspace }: Props) {
             {/* ─── Main Content ─── */}
             <main className={styles.main}>
                 <header className={styles.header}>
+                    <button className={styles.hamburger} onClick={() => setSidebarOpen(true)} title="Abrir menu">
+                        <span /><span /><span />
+                    </button>
                     <h1 className={styles.pageTitle}>Dashboard</h1>
                     <div className="user-profiles" style={{ display: "flex", gap: "0.5rem" }}>
                         <div className={styles.headerAvatar} title={userName}>{userName[0]}</div>

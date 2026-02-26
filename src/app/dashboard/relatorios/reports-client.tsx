@@ -128,6 +128,7 @@ export default function ReportsClient({ userName, workspace }: Props) {
     const [modal, setModal] = useState<"income" | "expense" | null>(null);
     const [showManage, setShowManage] = useState(false);
     const [visible, setVisible] = useState<Record<ChartId, boolean>>(DEFAULT_VISIBLE);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const toggleChart = (id: ChartId) => setVisible(v => ({ ...v, [id]: !v[id] }));
     const resetCharts = () => setVisible(DEFAULT_VISIBLE);
@@ -213,11 +214,17 @@ export default function ReportsClient({ userName, workspace }: Props) {
 
     return (
         <div className={styles.page}>
+            {/* ─── Mobile sidebar overlay ─── */}
+            {sidebarOpen && <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />}
+
             {/* ─── Sidebar ─── */}
-            <aside className={styles.sidebar}>
+            <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
                 <div className={styles.sidebarBrand}>
                     <span className={styles.brandDot} />
                     <span className={styles.brandName}>TuraTuno</span>
+                    <button className={styles.sidebarCloseBtn} onClick={() => setSidebarOpen(false)} title="Fechar menu">
+                        ✕
+                    </button>
                 </div>
                 <nav className={styles.nav}>
                     {[
@@ -251,6 +258,9 @@ export default function ReportsClient({ userName, workspace }: Props) {
 
                 {/* Global Tab Bar */}
                 <div className={styles.globalTabs}>
+                    <button className={styles.hamburger} onClick={() => setSidebarOpen(true)} title="Abrir menu">
+                        <span /><span /><span />
+                    </button>
                     <button className={`${styles.globalTab} ${styles.globalTabActive}`}>Gráficos</button>
                     <button className={styles.globalTab}>Lançamentos pendentes</button>
                     <button className={styles.globalTab}>Fluxo de caixa</button>
