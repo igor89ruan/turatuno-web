@@ -88,6 +88,16 @@ export default function DashboardClient({ userName, workspace }: Props) {
     const [hideExp, setHideExp] = useState(false);
     const [hideDisp, setHideDisp] = useState(false);
 
+    // Per-row action menu
+    const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+    const deleteTx = async (id: string) => {
+        if (!confirm("Excluir esta transação?")) return;
+        await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+        setOpenMenu(null);
+        router.refresh();
+    };
+
     const now = new Date();
     const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
     const mYear = viewDate.getFullYear();
@@ -333,7 +343,7 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.searchDateLabel}>Data de Vencimento</div>
                         </div>
 
-                        <div className={styles.txList}>
+                        <div className={styles.txList} onClick={() => setOpenMenu(null)}>
                             {filteredTxs.length === 0 ? (
                                 <p className={styles.emptyText}>Nenhuma transação encontrada.</p>
                             ) : (
@@ -365,10 +375,26 @@ export default function DashboardClient({ userName, workspace }: Props) {
                                             </p>
                                             <p className={styles.txDate}>{new Date(tx.date).toLocaleDateString("pt-BR")}</p>
                                         </div>
+                                        {/* ─── 3-dot menu ─── */}
+                                        <div className={styles.txMenuWrap} onClick={e => e.stopPropagation()}>
+                                            <button className={styles.txMenuBtn}
+                                                onClick={() => setOpenMenu(openMenu === tx.id ? null : tx.id)}>
+                                                ⋮
+                                            </button>
+                                            {openMenu === tx.id && (
+                                                <div className={styles.txMenuPopover}>
+                                                    <p className={styles.txMenuTitle}>Ações</p>
+                                                    <button className={styles.txMenuDelete} onClick={() => deleteTx(tx.id)}>
+                                                        🗑️ Excluir
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 ))
                             )}
                         </div>
+
                     </div>
 
                     {/* Chart Panel */}
