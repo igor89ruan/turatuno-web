@@ -68,6 +68,7 @@ export default function DashboardClient({ userName, workspace }: Props) {
     const [expandSaldo, setExpandSaldo] = useState(true);
     const [expandInc, setExpandInc] = useState(true);
     const [expandExp, setExpandExp] = useState(true);
+    const [hideValues, setHideValues] = useState(false);
 
     const now = new Date();
     const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
@@ -77,6 +78,9 @@ export default function DashboardClient({ userName, workspace }: Props) {
     const lastDay = new Date(mYear, mMonth + 1, 0).getDate();
 
     const allTxs = workspace?.transactions ?? [];
+
+    // ── Format helper (respects hide toggle) ──
+    const show = (v: number) => hideValues ? "••••" : fmt(v);
 
     // ── Month transactions ──
     const monthTxs = useMemo(() => allTxs.filter(t => {
@@ -191,11 +195,14 @@ export default function DashboardClient({ userName, workspace }: Props) {
                         <div className={styles.statCardTop}>
                             <div>
                                 <p className={styles.statLabel}>↗ Saldo Do Período Anterior</p>
-                                <p className={styles.statValue} style={{ color: prevBal >= 0 ? "#22c55e" : "#ef4444" }}>{fmt(prevBal)}</p>
+                                <p className={styles.statValue} style={{ color: prevBal >= 0 ? "#22c55e" : "#ef4444" }}>{show(prevBal)}</p>
                                 <p className={styles.statSub}>Até 31 De {MONTHS[mMonth === 0 ? 11 : mMonth - 1]}</p>
                             </div>
-                            <button className={styles.statEye}>
-                                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                            <button className={styles.statEye} onClick={() => setHideValues(v => !v)} title={hideValues ? "Mostrar valores" : "Esconder valores"}>
+                                {hideValues
+                                    ? <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                                    : <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                                }
                             </button>
                         </div>
                         <button className={styles.detailToggle} onClick={() => setExpandSaldo(v => !v)}>
@@ -205,11 +212,11 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.statSubRow}>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>⏳ Pendentes</span>
-                                    <span className={styles.subVal}>{fmt(prevBal < 0 ? Math.abs(prevBal) : 0)}</span>
+                                    <span className={styles.subVal}>{show(prevBal < 0 ? Math.abs(prevBal) : 0)}</span>
                                 </div>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>✅ Disponível</span>
-                                    <span className={styles.subVal}>{fmt(prevBal)}</span>
+                                    <span className={styles.subVal}>{show(prevBal)}</span>
                                 </div>
                             </div>
                         )}
@@ -220,7 +227,7 @@ export default function DashboardClient({ userName, workspace }: Props) {
                         <div className={styles.statCardTop}>
                             <div>
                                 <p className={styles.statLabel}>↗ Receitas</p>
-                                <p className={styles.statValue} style={{ color: "#22c55e" }}>{fmt(income)}</p>
+                                <p className={styles.statValue} style={{ color: "#22c55e" }}>{show(income)}</p>
                                 <p className={styles.statSub}>1 De {monthName} - {lastDay} De {monthName}</p>
                             </div>
                             <button className={styles.statEye}>
@@ -234,11 +241,11 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.statSubRow}>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>✅ Recebeu</span>
-                                    <span className={styles.subVal} style={{ color: "#22c55e" }}>{fmt(received)}</span>
+                                    <span className={styles.subVal} style={{ color: "#22c55e" }}>{show(received)}</span>
                                 </div>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>⏳ A receber</span>
-                                    <span className={styles.subVal}>{fmt(toReceive)}</span>
+                                    <span className={styles.subVal}>{show(toReceive)}</span>
                                 </div>
                             </div>
                         )}
@@ -249,7 +256,7 @@ export default function DashboardClient({ userName, workspace }: Props) {
                         <div className={styles.statCardTop}>
                             <div>
                                 <p className={styles.statLabel}>↘ Despesas</p>
-                                <p className={styles.statValue} style={{ color: "#ef4444" }}>- {fmt(expense)}</p>
+                                <p className={styles.statValue} style={{ color: "#ef4444" }}>- {show(expense)}</p>
                                 <p className={styles.statSub}>1 De {monthName} - {lastDay} De {monthName}</p>
                             </div>
                             <button className={styles.statEye}>
@@ -263,11 +270,11 @@ export default function DashboardClient({ userName, workspace }: Props) {
                             <div className={styles.statSubRow}>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>✅ Pago</span>
-                                    <span className={styles.subVal}>{fmt(paid)}</span>
+                                    <span className={styles.subVal}>{show(paid)}</span>
                                 </div>
                                 <div className={styles.subItem}>
                                     <span className={styles.subLabel}>⏳ A pagar</span>
-                                    <span className={styles.subVal} style={{ color: "#ef4444" }}>{fmt(toPay)}</span>
+                                    <span className={styles.subVal} style={{ color: "#ef4444" }}>{show(toPay)}</span>
                                 </div>
                             </div>
                         )}
@@ -277,12 +284,12 @@ export default function DashboardClient({ userName, workspace }: Props) {
                     <div className={`${styles.statCard} ${styles.statCardDouble}`}>
                         <div>
                             <p className={styles.statLabel}>↗ Saldo Disponível</p>
-                            <p className={styles.statValue} style={{ color: saldoDisp >= 0 ? "#22c55e" : "#ef4444" }}>{fmt(saldoDisp)}</p>
+                            <p className={styles.statValue} style={{ color: saldoDisp >= 0 ? "#22c55e" : "#ef4444" }}>{show(saldoDisp)}</p>
                             <p className={styles.statSub}>Até {lastDay} De {monthName} (Receita - Despesas + Saldo Bancário)</p>
                         </div>
                         <div style={{ marginTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "0.75rem" }}>
                             <p className={styles.statLabel}>↗ Saldo Previsto</p>
-                            <p className={styles.statValue} style={{ color: saldoPrev >= 0 ? "#22c55e" : "#ef4444" }}>{fmt(saldoPrev)}</p>
+                            <p className={styles.statValue} style={{ color: saldoPrev >= 0 ? "#22c55e" : "#ef4444" }}>{show(saldoPrev)}</p>
                             <p className={styles.statSub}>Até {lastDay} De {monthName} (Receitas - Despesas + Saldo Bancário)</p>
                         </div>
                     </div>
