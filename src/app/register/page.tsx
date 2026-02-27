@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
 import styles from "./register.module.css";
 
 // ── Translations ──────────────────────────────────────────────
@@ -84,9 +82,7 @@ function getStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
     return s as 0 | 1 | 2 | 3 | 4;
 }
 
-// Transformamos o formulário base num componente que não será exportado diretamente
-function RegisterFormBase() {
-    const searchParams = useSearchParams();
+export default function RegisterPage() {
     const [mode, setMode] = useState<Mode>("email");
     const [profile, setProfile] = useState<Profile>("personal");
     const [selectedCountry, setCountry] = useState(COUNTRIES[0]);
@@ -108,13 +104,17 @@ function RegisterFormBase() {
     const [apiError, setApiError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
+    // SOLUÇÃO: Usamos JavaScript puro no cliente para pegar os parâmetros, ignorando o Next.js Router
     useEffect(() => {
-        const preEmail = searchParams.get("email");
-        if (preEmail) {
-            setEmail(preEmail);
-            setMode("email");
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const preEmail = params.get("email");
+            if (preEmail) {
+                setEmail(preEmail);
+                setMode("email");
+            }
         }
-    }, [searchParams]);
+    }, []);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const langRef = useRef<HTMLDivElement>(null);
@@ -410,19 +410,4 @@ function RegisterFormBase() {
             </div>
         </div>
     );
-}
-
-// O segredo está aqui: Forçamos o Next.js a NÃO processar o formulário no servidor.
-const DynamicRegisterForm = dynamic(() => Promise.resolve(RegisterFormBase), {
-    ssr: false,
-    loading: () => (
-        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a', color: 'white', fontFamily: 'sans-serif' }}>
-            Carregando formulário...
-        </div>
-    )
-});
-
-// A página principal exporta apenas o componente dinâmico protegido
-export default function RegisterPage() {
-    return <DynamicRegisterForm />;
 }
