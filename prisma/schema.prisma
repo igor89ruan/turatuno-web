@@ -97,7 +97,15 @@ model Category {
   type         String        @default("expense")
   icon         String        @default("💰")
   colorHex     String        @default("#6366f1")
+  monthlyBudget Float?
+  keywords     String?
+  parentId     String?
+  status       String        @default("active")
   createdAt    DateTime      @default(now())
+  
+  parent       Category?     @relation("Subcategories", fields: [parentId], references: [id])
+  subcategories Category[]   @relation("Subcategories")
+  
   workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
