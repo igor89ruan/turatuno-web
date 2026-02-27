@@ -79,8 +79,8 @@ export default function DashboardClient({ userName, workspace }: Props) {
                 <nav className={styles.nav}>
                     {[
                         { icon: "📊", label: "Dashboard", href: "/dashboard", active: true },
-                        { icon: "📈", label: "Relatórios", href: "/dashboard/relatorios", active: false },
-                        { icon: "🏷️", label: "Categorias", href: "#", active: false },
+                        { icon: "📈", label: "Relatórios", href: "/relatorios", active: false },
+                        { icon: "🏷️", label: "Categorias", href: "/categorias", active: false },
                         { icon: "🏦", label: "Contas Bancárias", href: "#", active: false },
                         { icon: "💳", label: "Cartão de Crédito", href: "#", active: false },
                         { icon: "⚙️", label: "Configuração", href: "#", active: false },

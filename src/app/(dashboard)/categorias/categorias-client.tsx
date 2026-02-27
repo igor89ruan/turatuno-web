@@ -221,8 +221,8 @@ export default function CategoriasClient({ userName, initialCategories, workspac
                 </div>
                 <nav className={navStyles.nav}>
                     <Link href="/dashboard" className={navStyles.navItem}><span className={navStyles.navIcon}>📊</span><span>Dashboard</span></Link>
-                    <Link href="/dashboard/relatorios" className={navStyles.navItem}><span className={navStyles.navIcon}>📈</span><span>Relatórios</span></Link>
-                    <Link href="/dashboard/categorias" className={`${navStyles.navItem} ${navStyles.navActive}`}><span className={navStyles.navIcon}>🏷️</span><span>Categorias</span></Link>
+                    <Link href="/relatorios" className={navStyles.navItem}><span className={navStyles.navIcon}>📈</span><span>Relatórios</span></Link>
+                    <Link href="/categorias" className={`${navStyles.navItem} ${navStyles.navActive}`}><span className={navStyles.navIcon}>🏷️</span><span>Categorias</span></Link>
                     <Link href="#" className={navStyles.navItem}><span className={navStyles.navIcon}>🏦</span><span>Contas Bancárias</span></Link>
                     <Link href="#" className={navStyles.navItem}><span className={navStyles.navIcon}>💳</span><span>Cartão de Crédito</span></Link>
                 </nav>
@@ -352,7 +352,7 @@ export default function CategoriasClient({ userName, initialCategories, workspac
                                                     </button>
                                                 </>
                                             )}
-                                            <button className={styles.reportsBtn} onClick={() => router.push('/dashboard/relatorios')}>
+                                            <button className={styles.reportsBtn} onClick={() => router.push('/relatorios')}>
                                                 ⏱ Relatórios
                                             </button>
                                         </div>
