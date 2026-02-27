@@ -1,9 +1,8 @@
-const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,  // temporário para descobrir o erro real
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  experimental: {
+    typedRoutes: false,
   },
 };
 
