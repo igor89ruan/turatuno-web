@@ -99,7 +99,18 @@ function getStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
     return s as 0 | 1 | 2 | 3 | 4;
 }
 
-function RegisterPageContent() {
+function EmailQueryHandler({ onEmailFound }: { onEmailFound: (email: string) => void }) {
+    const searchParams = useSearchParams();
+    useEffect(() => {
+        const preEmail = searchParams.get("email");
+        if (preEmail) {
+            onEmailFound(preEmail);
+        }
+    }, [searchParams, onEmailFound]);
+    return null;
+}
+
+export default function RegisterPage() {
     const [mode, setMode] = useState<Mode>("email");
     const [profile, setProfile] = useState<Profile>("personal");
     const [selectedCountry, setCountry] = useState(COUNTRIES[0]);
@@ -122,15 +133,10 @@ function RegisterPageContent() {
     const [apiError, setApiError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    // Pre-fill email from query param (e.g., when redirected from login)
-    const searchParams = useSearchParams();
-    useEffect(() => {
-        const preEmail = searchParams.get("email");
-        if (preEmail) {
-            setEmail(preEmail);
-            setMode("email"); // switch to email mode automatically
-        }
-    }, [searchParams]);
+    const handleEmailFound = (preEmail: string) => {
+        setEmail(preEmail);
+        setMode("email");
+    };
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const langRef = useRef<HTMLDivElement>(null);
@@ -170,6 +176,10 @@ function RegisterPageContent() {
 
     return (
         <div className={`${styles.page} ${theme === "light" ? styles.light : ""}`}>
+            <Suspense fallback={null}>
+                <EmailQueryHandler onEmailFound={handleEmailFound} />
+            </Suspense>
+
             {/* ── Parallax Scene ── */}
             <div className={styles.sceneWrapper}>
                 <div ref={gridRef} className={styles.grid} />
@@ -442,17 +452,5 @@ function RegisterPageContent() {
                 </p>
             </div>
         </div>
-    );
-}
-
-export default function RegisterPage() {
-    return (
-        <Suspense fallback={
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#09090b', color: 'white' }}>
-                Carregando...
-            </div>
-        }>
-            <RegisterPageContent />
-        </Suspense>
     );
 }
