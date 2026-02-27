@@ -4,8 +4,8 @@ import { useState, useMemo } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import styles from "./dashboard.module.css";
-import TransactionModal from "./transaction-modal";
+import styles from "../dashboard.module.css";
+import TransactionModal from "../transaction-modal";
 
 // ── Types ──────────────────────────────────────────────────────
 type Tx = {
