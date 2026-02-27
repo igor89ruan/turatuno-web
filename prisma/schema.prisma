@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -17,40 +14,61 @@ model User {
   email     String?  @unique
   phone     String?  @unique
   password  String
+  avatarUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Workspace relationship
   workspaceUsers WorkspaceUser[]
   transactions   Transaction[]
+  subscriptions  Subscription[]
 
   @@map("users")
+}
+
+model Subscription {
+  id                 String    @id @default(cuid())
+  userId             String
+  plan               String    @default("trial") // trial | impulso | sintonia
+  status             String    @default("active") // active | canceled | past_due
+  trialEndsAt        DateTime?
+  currentPeriodEnd   DateTime?
+  stripeCustomerId   String?
+  stripeSubscriptionId String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }
 
 model Workspace {
   id              String   @id @default(cuid())
   name            String
+  iconEmoji       String?  @default("💰")
   profileType     String   @default("personal") // personal | business
   defaultCurrency String   @default("BRL")
+  timezone        String   @default("America/Sao_Paulo")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Relations
   members      WorkspaceUser[]
   accounts     Account[]
   creditCards  CreditCard[]
   categories   Category[]
   transactions Transaction[]
+  goals        Goal[]
+  budgets      Budget[]
 
   @@map("workspaces")
 }
 
 model WorkspaceUser {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   workspaceId String
   userId      String
-  role        String    @default("member") // owner | member
-  joinedAt    DateTime  @default(now())
+  role        String   @default("member") // owner | member
+  joinedAt    DateTime @default(now())
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -65,13 +83,14 @@ model Account {
   name        String
   type        String   @default("checking") // checking | savings | cash | investment
   balance     Float    @default(0)
-  color       String   @default("#6366f1")
+  color       String   @default("#3b82f6")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   transactions Transaction[]
   creditCards  CreditCard[]
+  goals        Goal[]
 
   @@map("accounts")
 }
@@ -82,9 +101,11 @@ model CreditCard {
   accountId   String?
   name        String
   limit       Float
-  closingDay  Int      // day of month (1-31)
-  dueDay      Int      // day of month (1-31)
-  color       String   @default("#8b5cf6")
+  closingDay  Int
+  dueDay      Int
+  color       String   @default("#6366f1")
+  network     String?  // visa | mastercard | elo | hipercard
+  lastFour    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -100,8 +121,9 @@ model Category {
   workspaceId String
   name        String
   type        String   @default("expense") // income | expense
-  icon        String   @default("💰")
-  colorHex    String   @default("#6366f1")
+  icon        String   @default("📦")
+  colorHex    String   @default("#64748b")
+  isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -122,6 +144,7 @@ model Transaction {
   description  String
   date         DateTime @default(now())
   status       String   @default("paid") // pending | paid
+  isRecurring  Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -132,4 +155,38 @@ model Transaction {
   user       User        @relation(fields: [userId], references: [id])
 
   @@map("transactions")
+}
+
+model Goal {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  accountId     String?
+  name          String
+  emoji         String   @default("🎯")
+  targetAmount  Float
+  currentAmount Float    @default(0)
+  targetDate    DateTime
+  status        String   @default("active") // active | completed | paused
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  account   Account?  @relation(fields: [accountId], references: [id])
+
+  @@map("goals")
+}
+
+model Budget {
+  id          String   @id @default(cuid())
+  workspaceId String
+  categoryId  String?
+  name        String
+  amount      Float
+  period      String   @default("monthly") // monthly | weekly | yearly
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("budgets")
 }
