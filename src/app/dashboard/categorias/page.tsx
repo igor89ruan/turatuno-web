@@ -2,6 +2,8 @@ import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import CategoriasClient from "./categorias-client";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CategoriasPage() {
     const session = await requireSession();
 
@@ -14,15 +16,13 @@ export default async function CategoriasPage() {
         return <div>Nenhum workspace encontrado.</div>;
     }
 
-    // Fetch active categories and subcategories explicitly for SSR load
+    // Fetch all categories and subcategories explicitly for SSR load
     const categories = await prisma.category.findMany({
         where: {
             workspaceId: workspaceUser.workspaceId,
-            status: "active",
         },
         include: {
             subcategories: {
-                where: { status: "active" },
                 orderBy: { name: "asc" },
             },
         },
