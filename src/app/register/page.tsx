@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-
+import { useState, useRef, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from "./register.module.css";
 
 // ── Translations ──────────────────────────────────────────────
@@ -99,7 +99,8 @@ function getStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
     return s as 0 | 1 | 2 | 3 | 4;
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
+    const searchParams = useSearchParams();
     const [mode, setMode] = useState<Mode>("email");
     const [profile, setProfile] = useState<Profile>("personal");
     const [selectedCountry, setCountry] = useState(COUNTRIES[0]);
@@ -110,29 +111,24 @@ export default function RegisterPage() {
     const [showCf, setShowCf] = useState(false);
     const [theme, setTheme] = useState<Theme>("dark");
     const [lang, setLang] = useState<LangKey>("PT");
-    // Form fields
+
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [agreed, setAgreed] = useState(false);
-    // API state
     const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    // Pre-fill email from query param (e.g., when redirected from login)
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const params = new URLSearchParams(window.location.search);
-            const preEmail = params.get("email");
-            if (preEmail) {
-                setEmail(preEmail);
-                setMode("email");
-            }
+        const preEmail = searchParams.get("email");
+        if (preEmail) {
+            setEmail(preEmail);
+            setMode("email");
         }
-    }, []);
+    }, [searchParams]);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const langRef = useRef<HTMLDivElement>(null);
@@ -144,7 +140,6 @@ export default function RegisterPage() {
     const strengthLabels = [t.weak, t.fair, t.good, t.strong];
     const strengthColors = ["#ef4444", "#f59e0b", "#10b981", "#6366f1"];
 
-    // Parallax
     useEffect(() => {
         const fn = (e: MouseEvent) => {
             const x = (e.clientX / window.innerWidth - 0.5) * 40;
@@ -156,7 +151,6 @@ export default function RegisterPage() {
         return () => window.removeEventListener("mousemove", fn);
     }, []);
 
-    // Close dropdowns on outside click
     useEffect(() => {
         const fn = (e: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) { setDropdown(false); setSearch(""); }
@@ -172,7 +166,6 @@ export default function RegisterPage() {
 
     return (
         <div className={`${styles.page} ${theme === "light" ? styles.light : ""}`}>
-            {/* ── Parallax Scene ── */}
             <div className={styles.sceneWrapper}>
                 <div ref={gridRef} className={styles.grid} />
                 <div ref={bgRef} className={styles.orbs}>
@@ -184,7 +177,6 @@ export default function RegisterPage() {
                 <div className={styles.scanlines} />
             </div>
 
-            {/* ── Top Controls ── */}
             <div className={styles.topBar}>
                 <div ref={langRef} className={styles.langWrapper}>
                     <button className={styles.controlBtn} onClick={() => setLangMenu(!langMenuOpen)}>
@@ -221,9 +213,7 @@ export default function RegisterPage() {
                 </button>
             </div>
 
-            {/* ── Card ── */}
             <div className={styles.card}>
-                {/* Brand */}
                 <div className={styles.brand}>
                     <span className={styles.brandDot} />
                     <span className={styles.brandName}>TuraTuno</span>
@@ -261,7 +251,6 @@ export default function RegisterPage() {
                     }
                 }}>
 
-                    {/* Full Name */}
                     <div className={styles.fieldGroup}>
                         <label className={styles.label}>{t.labelName}</label>
                         <div className={styles.inputIcon}>
@@ -273,7 +262,6 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Profile Type */}
                     <div className={styles.fieldGroup}>
                         <label className={styles.label}>{t.profileType}</label>
                         <div className={styles.profileToggle}>
@@ -290,7 +278,6 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Login method */}
                     <div className={styles.fieldGroup}>
                         <label className={styles.label}>{t.loginMethod}</label>
                         <div className={styles.toggle}>
@@ -299,7 +286,6 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Phone */}
                     {mode === "phone" && (
                         <div className={styles.fieldGroup}>
                             <label className={styles.label}>{t.labelPhone}</label>
@@ -341,7 +327,6 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    {/* Email */}
                     {mode === "email" && (
                         <div className={styles.fieldGroup}>
                             <label className={styles.label}>{t.labelEmail}</label>
@@ -355,7 +340,6 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    {/* Password */}
                     <div className={styles.fieldGroup}>
                         <label className={styles.label}>{t.labelPassword}</label>
                         <div className={styles.passwordWrapper}>
@@ -368,7 +352,6 @@ export default function RegisterPage() {
                             </div>
                             <button type="button" className={styles.eyeBtn} onClick={() => setShowPw(!showPw)}>{showPw ? "🙈" : "👁️"}</button>
                         </div>
-                        {/* Strength meter */}
                         {password.length > 0 && (
                             <div className={styles.strengthWrapper}>
                                 <div className={styles.strengthBars}>
@@ -384,7 +367,6 @@ export default function RegisterPage() {
                         )}
                     </div>
 
-                    {/* Confirm password */}
                     <div className={styles.fieldGroup}>
                         <label className={styles.label}>{t.labelConfirm}</label>
                         <div className={styles.passwordWrapper}>
@@ -399,21 +381,18 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* API error feedback */}
                     {apiError && (
                         <div className={styles.errorBanner}>
                             ⚠️ {apiError}
                         </div>
                     )}
 
-                    {/* Success feedback */}
                     {success && (
                         <div className={styles.successBanner}>
                             ✅ Conta criada! Redirecionando para o login...
                         </div>
                     )}
 
-                    {/* Terms */}
                     <label className={styles.termsRow}>
                         <input type="checkbox" className={styles.checkbox} checked={agreed} onChange={e => setAgreed(e.target.checked)} />
                         <span className={styles.termsText}>
@@ -444,5 +423,17 @@ export default function RegisterPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={
+            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a', color: 'white', fontFamily: 'sans-serif' }}>
+                Carregando formulário...
+            </div>
+        }>
+            <RegisterForm />
+        </Suspense>
     );
 }
