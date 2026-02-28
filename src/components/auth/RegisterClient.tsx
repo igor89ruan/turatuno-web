@@ -72,7 +72,7 @@ export default function RegisterClient() {
             <p style={{ fontFamily: "'Instrument Serif',Georgia,serif", fontSize: "1.6rem", color: "#fff", lineHeight: 1.15, marginBottom: ".5rem", fontWeight: 400 }}>
               +2.400 brasileiros<br/>já no controle.
             </p>
-            <p style={{ fontSize: ".82rem", color: "rgba(255,255,255,.32)", lineHeight: 1.65, marginBottom: "2rem" }}>
+            <p style={{ fontSize: ".82rem", color: "rgba(255,255,255,.60)", lineHeight: 1.65, marginBottom: "2rem" }}>
               Veja o que estão dizendo após os primeiros 7 dias.
             </p>
 
@@ -84,12 +84,12 @@ export default function RegisterClient() {
               ].map((t, i) => (
                 <div key={i} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 12, padding: ".9rem 1rem" }}>
                   <div style={{ color: "#f59e0b", fontSize: ".7rem", letterSpacing: 1, marginBottom: ".45rem" }}>★★★★★</div>
-                  <div style={{ fontSize: ".78rem", color: "rgba(255,255,255,.55)", lineHeight: 1.65, marginBottom: ".6rem" }}>{t.text}</div>
+                  <div style={{ fontSize: ".78rem", color: "rgba(255,255,255,.75)", lineHeight: 1.65, marginBottom: ".6rem" }}>{t.text}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: ".55rem" }}>
                     <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".8rem", flexShrink: 0 }}>{t.av}</div>
                     <div>
-                      <div style={{ fontSize: ".72rem", fontWeight: 700, color: "rgba(255,255,255,.65)" }}>{t.name}</div>
-                      <div style={{ fontSize: ".62rem", color: "rgba(255,255,255,.3)" }}>{t.role}</div>
+                      <div style={{ fontSize: ".72rem", fontWeight: 700, color: "rgba(255,255,255,.85)" }}>{t.name}</div>
+                      <div style={{ fontSize: ".62rem", color: "rgba(255,255,255,.55)" }}>{t.role}</div>
                     </div>
                   </div>
                 </div>
@@ -101,7 +101,7 @@ export default function RegisterClient() {
               {[{ v: "2.4k", s: "usuários ativos" }, { v: "4.9★", s: "avaliação média" }, { v: "97%", s: "de satisfação" }, { v: "60s", s: "para começar" }].map((s, i) => (
                 <div key={i} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 10, padding: ".75rem .85rem", textAlign: "center" }}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-.04em", color: "#fff", lineHeight: 1 }}>{s.v}</div>
-                  <div style={{ fontSize: ".65rem", color: "rgba(255,255,255,.3)", marginTop: ".2rem", fontWeight: 500 }}>{s.s}</div>
+                  <div style={{ fontSize: ".65rem", color: "rgba(255,255,255,.55)", marginTop: ".2rem", fontWeight: 500 }}>{s.s}</div>
                 </div>
               ))}
             </div>
@@ -137,7 +137,7 @@ export default function RegisterClient() {
             <h1 style={{ fontFamily: "'Instrument Serif',Georgia,serif", fontSize: "2.2rem", color: "#fff", lineHeight: 1.12, marginBottom: ".6rem", fontWeight: 400 }}>
               Crie sua conta<br/>e comece <em style={{ fontStyle: "italic", background: "linear-gradient(130deg,#93c5fd,#a5f3fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>agora.</em>
             </h1>
-            <p style={{ fontSize: ".88rem", color: "rgba(255,255,255,.38)", marginBottom: "2rem", lineHeight: 1.65 }}>Menos de 60 segundos. Sem CPF, sem cartão, sem burocracia.</p>
+            <p style={{ fontSize: ".88rem", color: "rgba(255,255,255,.65)", marginBottom: "2rem", lineHeight: 1.65 }}>Menos de 60 segundos. Sem CPF, sem cartão, sem burocracia.</p>
 
             {error && (
               <div style={{ background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.25)", borderRadius: 10, padding: ".75rem 1rem", marginBottom: "1rem", fontSize: ".82rem", color: "#fca5a5" }}>
@@ -154,7 +154,7 @@ export default function RegisterClient() {
                   { label: "Sobrenome", val: sobrenome, set: setSobrenome, ph: "Sobrenome", ac: "family-name" },
                 ].map(f => (
                   <div key={f.label} style={{ display: "flex", flexDirection: "column", gap: ".38rem" }}>
-                    <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.45)", letterSpacing: ".02em" }}>{f.label}</label>
+                    <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.70)", letterSpacing: ".02em" }}>{f.label}</label>
                     <input type="text" value={f.val} onChange={e => f.set(e.target.value)} required placeholder={f.ph} autoComplete={f.ac} style={inputStyle}
                       onFocus={e => { e.target.style.borderColor = "rgba(37,99,235,.6)"; e.target.style.background = "rgba(37,99,235,.06)"; }}
                       onBlur={e => { e.target.style.borderColor = "rgba(255,255,255,.1)"; e.target.style.background = "rgba(255,255,255,.05)"; }}
@@ -165,7 +165,7 @@ export default function RegisterClient() {
 
               {/* E-mail */}
               <div style={{ display: "flex", flexDirection: "column", gap: ".38rem" }}>
-                <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.45)", letterSpacing: ".02em" }}>E-mail</label>
+                <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.70)", letterSpacing: ".02em" }}>E-mail</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="seu@email.com" autoComplete="email" style={inputStyle}
                   onFocus={e => { e.target.style.borderColor = "rgba(37,99,235,.6)"; e.target.style.background = "rgba(37,99,235,.06)"; }}
                   onBlur={e => { e.target.style.borderColor = "rgba(255,255,255,.1)"; e.target.style.background = "rgba(255,255,255,.05)"; }}
@@ -174,7 +174,7 @@ export default function RegisterClient() {
 
               {/* Senha */}
               <div style={{ display: "flex", flexDirection: "column", gap: ".38rem" }}>
-                <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.45)", letterSpacing: ".02em" }}>Senha</label>
+                <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.70)", letterSpacing: ".02em" }}>Senha</label>
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Mín. 8 caracteres" autoComplete="new-password" style={inputStyle}
                   onFocus={e => { e.target.style.borderColor = "rgba(37,99,235,.6)"; e.target.style.background = "rgba(37,99,235,.06)"; }}
                   onBlur={e => { e.target.style.borderColor = "rgba(255,255,255,.1)"; e.target.style.background = "rgba(255,255,255,.05)"; }}
@@ -183,7 +183,7 @@ export default function RegisterClient() {
 
               {/* Plano */}
               <div style={{ display: "flex", flexDirection: "column", gap: ".38rem" }}>
-                <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.45)", letterSpacing: ".02em" }}>Escolha seu plano</label>
+                <label style={{ fontSize: ".75rem", fontWeight: 700, color: "rgba(255,255,255,.70)", letterSpacing: ".02em" }}>Escolha seu plano</label>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".65rem" }}>
                   {([
                     { id: "impulso" as Plan, icon: "⚡", name: "Impulso", price: "R$19,90/mês · 1 usuário", tag: null },
@@ -206,7 +206,7 @@ export default function RegisterClient() {
 
               <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                 <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
-                <span style={{ fontSize: ".7rem", color: "rgba(255,255,255,.22)", fontWeight: 600 }}>ou</span>
+                <span style={{ fontSize: ".7rem", color: "rgba(255,255,255,.50)", fontWeight: 600 }}>ou</span>
                 <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
               </div>
 
@@ -218,7 +218,7 @@ export default function RegisterClient() {
                 Criar conta com Google
               </button>
 
-              <p style={{ fontSize: ".74rem", color: "rgba(255,255,255,.28)", lineHeight: 1.55, textAlign: "center", marginTop: ".25rem" }}>
+              <p style={{ fontSize: ".74rem", color: "rgba(255,255,255,.52)", lineHeight: 1.55, textAlign: "center", marginTop: ".25rem" }}>
                 Ao criar sua conta você concorda com os{" "}
                 <Link href="/terms" style={{ color: "rgba(37,99,235,.8)", textDecoration: "none" }}>Termos de Uso</Link>
                 {" "}e a{" "}
@@ -226,9 +226,9 @@ export default function RegisterClient() {
               </p>
             </form>
 
-            <p style={{ textAlign: "center", fontSize: ".78rem", color: "rgba(255,255,255,.28)", marginTop: "1.25rem" }}>
+            <p style={{ textAlign: "center", fontSize: ".78rem", color: "rgba(255,255,255,.58)", marginTop: "1.25rem" }}>
               Já tem conta?{" "}
-              <Link href="/auth/login" style={{ color: "rgba(37,99,235,.9)", fontWeight: 700, textDecoration: "none" }}
+              <Link href="/login" style={{ color: "rgba(37,99,235,.9)", fontWeight: 700, textDecoration: "none" }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#60a5fa"}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(37,99,235,.9)"}
               >Entrar →</Link>

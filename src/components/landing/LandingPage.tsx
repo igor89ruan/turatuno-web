@@ -129,11 +129,11 @@ export default function LandingPage() {
         </div>
 
         <div style={{ display:"flex", gap:".6rem", alignItems:"center" }}>
-          <Link href="/auth/login" style={{ fontSize:".83rem", fontWeight:600, color: scrollY > 55 ? "#64748b" : "rgba(255,255,255,.5)", padding:".38rem .8rem", textDecoration:"none", transition:"color .2s" }}
+          <Link href="/login" style={{ fontSize:".83rem", fontWeight:600, color: scrollY > 55 ? "#64748b" : "rgba(255,255,255,.5)", padding:".38rem .8rem", textDecoration:"none", transition:"color .2s" }}
             onMouseEnter={e => e.currentTarget.style.color = "#2563eb"}
             onMouseLeave={e => e.currentTarget.style.color = scrollY > 55 ? "#64748b" : "rgba(255,255,255,.5)"}
           >Entrar</Link>
-          <Link href="/auth/register" style={{ display:"inline-flex", alignItems:"center", gap:".3rem", background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".88rem", padding:".6rem 1.2rem", borderRadius:10, textDecoration:"none", boxShadow:"0 4px 14px rgba(37,99,235,.32)", transition:"all .22s" }}
+          <Link href="/register" style={{ display:"inline-flex", alignItems:"center", gap:".3rem", background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".88rem", padding:".6rem 1.2rem", borderRadius:10, textDecoration:"none", boxShadow:"0 4px 14px rgba(37,99,235,.32)", transition:"all .22s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background="#1d4ed8"; (e.currentTarget as HTMLElement).style.transform="translateY(-1px)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background="#2563eb"; (e.currentTarget as HTMLElement).style.transform=""; }}
           >Começar grátis</Link>
@@ -167,7 +167,7 @@ export default function LandingPage() {
 
           {/* CTAs */}
           <div style={{ display:"flex", gap:".8rem", justifyContent:"center", flexWrap:"wrap", marginBottom:"3rem", animation:"fadeUp .85s ease .24s both" }}>
-            <Link href="/auth/register" style={{ background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".97rem", padding:".9rem 2rem", borderRadius:13, textDecoration:"none", boxShadow:"0 4px 18px rgba(37,99,235,.36)", transition:"all .22s", display:"inline-flex", alignItems:"center", gap:".35rem" }}
+            <Link href="/register" style={{ background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".97rem", padding:".9rem 2rem", borderRadius:13, textDecoration:"none", boxShadow:"0 4px 18px rgba(37,99,235,.36)", transition:"all .22s", display:"inline-flex", alignItems:"center", gap:".35rem" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background="#1d4ed8"; (e.currentTarget as HTMLElement).style.transform="translateY(-2px)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background="#2563eb"; (e.currentTarget as HTMLElement).style.transform=""; }}
             >Criar conta gratuita →</Link>
@@ -378,7 +378,7 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <Link href="/auth/register" style={{ display:"block", textAlign:"center", padding:".88rem", borderRadius:12, background:"transparent", color:"#0f172a", fontWeight:700, fontSize:".88rem", border:"1.5px solid #e2e8f0", textDecoration:"none", transition:"all .22s" }}
+                <Link href="/register" style={{ display:"block", textAlign:"center", padding:".88rem", borderRadius:12, background:"transparent", color:"#0f172a", fontWeight:700, fontSize:".88rem", border:"1.5px solid #e2e8f0", textDecoration:"none", transition:"all .22s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor="#2563eb"; (e.currentTarget as HTMLElement).style.color="#2563eb"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor="#e2e8f0"; (e.currentTarget as HTMLElement).style.color="#0f172a"; }}
                 >Começar 7 dias grátis →</Link>
@@ -455,7 +455,7 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                <Link href="/auth/register" style={{ display:"block", textAlign:"center", padding:".88rem", borderRadius:12, background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".88rem", textDecoration:"none", boxShadow:"0 4px 16px rgba(37,99,235,.36)", transition:"all .22s" }}
+                <Link href="/register" style={{ display:"block", textAlign:"center", padding:".88rem", borderRadius:12, background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".88rem", textDecoration:"none", boxShadow:"0 4px 16px rgba(37,99,235,.36)", transition:"all .22s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background="#1d4ed8"; (e.currentTarget as HTMLElement).style.transform="translateY(-1px)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background="#2563eb"; (e.currentTarget as HTMLElement).style.transform=""; }}
                 >🚀 Começar 7 dias grátis</Link>
@@ -513,7 +513,7 @@ export default function LandingPage() {
               Chega de fim de mês com saldo negativo e sem entender o que aconteceu. Controle real começa em 60 segundos.
             </p>
             <div style={{ display:"flex", gap:".8rem", justifyContent:"center", flexWrap:"wrap" }}>
-              <Link href="/auth/register" style={{ background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".97rem", padding:".9rem 2rem", borderRadius:13, textDecoration:"none", boxShadow:"0 4px 18px rgba(37,99,235,.36)", transition:"all .22s" }}
+              <Link href="/register" style={{ background:"#2563eb", color:"#fff", fontWeight:700, fontSize:".97rem", padding:".9rem 2rem", borderRadius:13, textDecoration:"none", boxShadow:"0 4px 18px rgba(37,99,235,.36)", transition:"all .22s" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background="#1d4ed8"; (e.currentTarget as HTMLElement).style.transform="translateY(-2px)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background="#2563eb"; (e.currentTarget as HTMLElement).style.transform=""; }}
               >Criar conta gratuita →</Link>

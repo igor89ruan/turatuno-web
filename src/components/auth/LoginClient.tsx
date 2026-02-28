@@ -66,7 +66,7 @@ export default function LoginClient() {
             <h1 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:"2.4rem", color:"#fff", lineHeight:1.12, marginBottom:".6rem", fontWeight:400 }}>
               Bem-vindo<br/>de <em style={{ fontStyle:"italic", background:"linear-gradient(130deg,#93c5fd,#a5f3fc)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>volta.</em>
             </h1>
-            <p style={{ fontSize:".9rem", color:"rgba(255,255,255,.38)", marginBottom:"2.25rem", lineHeight:1.65 }}>Entre na sua conta e retome o controle das suas finanças onde parou.</p>
+            <p style={{ fontSize:".9rem", color:"rgba(255,255,255,.65)", marginBottom:"2.25rem", lineHeight:1.65 }}>Entre na sua conta e retome o controle das suas finanças onde parou.</p>
 
             {error && (
               <div style={{ background:"rgba(239,68,68,.1)", border:"1px solid rgba(239,68,68,.25)", borderRadius:10, padding:".75rem 1rem", marginBottom:"1rem", fontSize:".82rem", color:"#fca5a5" }}>
@@ -76,7 +76,7 @@ export default function LoginClient() {
 
             <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"1rem" }}>
               <div style={{ display:"flex", flexDirection:"column", gap:".4rem" }}>
-                <label style={{ fontSize:".78rem", fontWeight:700, color:"rgba(255,255,255,.5)", letterSpacing:".02em" }}>E-mail</label>
+                <label style={{ fontSize:".78rem", fontWeight:700, color:"rgba(255,255,255,.72)", letterSpacing:".02em" }}>E-mail</label>
                 <input
                   type="email" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email"
                   placeholder="seu@email.com"
@@ -88,8 +88,8 @@ export default function LoginClient() {
 
               <div style={{ display:"flex", flexDirection:"column", gap:".4rem" }}>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <label style={{ fontSize:".78rem", fontWeight:700, color:"rgba(255,255,255,.5)", letterSpacing:".02em" }}>Senha</label>
-                  <Link href="/auth/forgot-password" style={{ fontSize:".75rem", color:"rgba(255,255,255,.35)", fontWeight:600, textDecoration:"none" }}
+                  <label style={{ fontSize:".78rem", fontWeight:700, color:"rgba(255,255,255,.72)", letterSpacing:".02em" }}>Senha</label>
+                  <Link href="/auth/forgot-password" style={{ fontSize:".75rem", color:"rgba(255,255,255,.58)", fontWeight:600, textDecoration:"none" }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.color="rgba(37,99,235,.9)"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.color="rgba(255,255,255,.35)"}
                   >Esqueci a senha</Link>
@@ -109,7 +109,7 @@ export default function LoginClient() {
 
               <div style={{ display:"flex", alignItems:"center", gap:"1rem" }}>
                 <div style={{ flex:1, height:1, background:"rgba(255,255,255,.08)" }}/>
-                <span style={{ fontSize:".72rem", color:"rgba(255,255,255,.25)", fontWeight:600 }}>ou continue com</span>
+                <span style={{ fontSize:".72rem", color:"rgba(255,255,255,.52)", fontWeight:600 }}>ou continue com</span>
                 <div style={{ flex:1, height:1, background:"rgba(255,255,255,.08)" }}/>
               </div>
 
@@ -122,9 +122,9 @@ export default function LoginClient() {
               </button>
             </form>
 
-            <p style={{ textAlign:"center", fontSize:".8rem", color:"rgba(255,255,255,.3)", marginTop:"1.5rem" }}>
+            <p style={{ textAlign:"center", fontSize:".8rem", color:"rgba(255,255,255,.58)", marginTop:"1.5rem" }}>
               Não tem conta?{" "}
-              <Link href="/auth/register" style={{ color:"rgba(37,99,235,.9)", fontWeight:700, textDecoration:"none" }}
+              <Link href="/register" style={{ color:"rgba(37,99,235,.9)", fontWeight:700, textDecoration:"none" }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.color="#60a5fa"}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.color="rgba(37,99,235,.9)"}
               >Criar conta grátis →</Link>
@@ -137,7 +137,7 @@ export default function LoginClient() {
           <div style={{ position:"absolute", width:400, height:400, borderRadius:"50%", background:"radial-gradient(circle,rgba(37,99,235,.1) 0%,transparent 70%)", filter:"blur(60px)", top:"50%", left:"50%", transform:"translate(-50%,-50%)", pointerEvents:"none" }}/>
           <div style={{ position:"relative", zIndex:1, width:"100%", animation:"slideUp .7s ease .15s both" }}>
             <p style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:"1.35rem", color:"#fff", marginBottom:".4rem", fontWeight:400, textAlign:"center" }}>Seu dinheiro,<br/>organizado.</p>
-            <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.3)", textAlign:"center", marginBottom:"2rem", lineHeight:1.55 }}>Veja tudo em um lugar. Contas, cartões, metas e relatórios — sempre à mão.</p>
+            <p style={{ fontSize:".78rem", color:"rgba(255,255,255,.58)", textAlign:"center", marginBottom:"2rem", lineHeight:1.55 }}>Veja tudo em um lugar. Contas, cartões, metas e relatórios — sempre à mão.</p>
 
             {/* Mini dashboard */}
             <div style={{ background:"#0d1526", border:"1px solid rgba(255,255,255,.07)", borderRadius:16, overflow:"hidden", boxShadow:"0 24px 70px rgba(0,0,0,.6)" }}>
