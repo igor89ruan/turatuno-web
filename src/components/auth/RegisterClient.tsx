@@ -32,7 +32,7 @@ export default function RegisterClient() {
       if (!res.ok) throw new Error(data.error || "Erro ao criar conta.");
 
       // Auto-login após cadastro
-      await signIn("credentials", { email, password, redirect: false });
+      await signIn("credentials", { identifier: email, password, redirect: false });
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro ao criar conta.");
