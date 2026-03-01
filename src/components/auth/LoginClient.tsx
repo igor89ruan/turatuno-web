@@ -17,7 +17,7 @@ export default function LoginClient() {
     setLoading(true);
     setError("");
     const res = await signIn("credentials", {
-      email, password, redirect: false,
+      identifier: email, password, redirect: false,
     });
     setLoading(false);
     if (res?.error) {

@@ -3,33 +3,33 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { randomUUID } from "crypto";
 
 // Helper to create a default workspace + categories for a new user
-async function createWorkspaceForUser(
-    tx: Prisma.TransactionClient,
-    userId: string,
-    firstName: string,
-) {
-    const workspace = await tx.workspace.create({
-        data: { name: `Finanças de ${firstName}`, profileType: "personal" },
-    });
-    await tx.workspaceUser.create({
-        data: { workspaceId: workspace.id, userId, role: "owner" },
-    });
-    await tx.category.createMany({
-        data: [
-            { name: "Alimentação", type: "expense", icon: "🍔", colorHex: "#ef4444", workspaceId: workspace.id },
-            { name: "Transporte", type: "expense", icon: "🚗", colorHex: "#f59e0b", workspaceId: workspace.id },
-            { name: "Saúde", type: "expense", icon: "❤️", colorHex: "#ec4899", workspaceId: workspace.id },
-            { name: "Lazer", type: "expense", icon: "🎮", colorHex: "#8b5cf6", workspaceId: workspace.id },
-            { name: "Educação", type: "expense", icon: "📚", colorHex: "#3b82f6", workspaceId: workspace.id },
-            { name: "Moradia", type: "expense", icon: "🏠", colorHex: "#6366f1", workspaceId: workspace.id },
-            { name: "Salário", type: "income", icon: "💰", colorHex: "#10b981", workspaceId: workspace.id },
-            { name: "Freelance", type: "income", icon: "🧑‍💻", colorHex: "#22d3ee", workspaceId: workspace.id },
-        ],
-    });
-    return workspace;
+// Uses batch transaction (compatible with connection poolers like Neon/Supabase)
+async function createWorkspaceForUser(userId: string, firstName: string) {
+    const workspaceId = randomUUID();
+    await prisma.$transaction([
+        prisma.workspace.create({
+            data: { id: workspaceId, name: `Finanças de ${firstName}`, profileType: "personal" },
+        }),
+        prisma.workspaceUser.create({
+            data: { workspaceId, userId, role: "owner" },
+        }),
+        prisma.category.createMany({
+            data: [
+                { name: "Alimentação", type: "expense", icon: "🍔", colorHex: "#ef4444", workspaceId },
+                { name: "Transporte",  type: "expense", icon: "🚗", colorHex: "#f59e0b", workspaceId },
+                { name: "Saúde",       type: "expense", icon: "❤️", colorHex: "#ec4899", workspaceId },
+                { name: "Lazer",       type: "expense", icon: "🎮", colorHex: "#8b5cf6", workspaceId },
+                { name: "Educação",    type: "expense", icon: "📚", colorHex: "#3b82f6", workspaceId },
+                { name: "Moradia",     type: "expense", icon: "🏠", colorHex: "#6366f1", workspaceId },
+                { name: "Salário",     type: "income",  icon: "💰", colorHex: "#10b981", workspaceId },
+                { name: "Freelance",   type: "income",  icon: "🧑‍💻", colorHex: "#22d3ee", workspaceId },
+            ],
+        }),
+    ]);
+    return workspaceId;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -82,14 +82,13 @@ export const authOptions: NextAuthOptions = {
             if (account?.provider === "google" && user.email) {
                 const existing = await prisma.user.findFirst({ where: { email: user.email } });
                 if (!existing) {
-                    const created = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-                        const u = await tx.user.create({
-                            data: { name: user.name ?? "Usuário Google", email: user.email!, password: "" },
-                        });
-                        await createWorkspaceForUser(tx, u.id, (user.name ?? "Usuário").split(" ")[0]);
-                        return u;
+                    const userId = randomUUID();
+                    const firstName = (user.name ?? "Usuário").split(" ")[0];
+                    await prisma.user.create({
+                        data: { id: userId, name: user.name ?? "Usuário Google", email: user.email, password: "" },
                     });
-                    user.id = created.id;
+                    await createWorkspaceForUser(userId, firstName);
+                    user.id = userId;
                 } else {
                     user.id = existing.id;
                 }
