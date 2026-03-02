@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import ProfileModal from "@/components/profile/ProfileModal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./relatorios.module.css";
 import TransactionModal from "../transaction-modal";
+import ThemeToggleBtn from "@/components/ui/ThemeToggleBtn";
+import LanguageSelector from "@/components/ui/LanguageSelector";
+import { useLanguage } from "@/lib/language-context";
 
 // ── Types ──────────────────────────────────────────────────────
 type Tx = {
@@ -72,10 +76,10 @@ function MultiSliceDonut({ data, total, title, emptyColor }: { data: { val: numb
                     />
                 );
             })}
-            <text x={cx} y={cy - 6} textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">
+            <text x={cx} y={cy - 6} textAnchor="middle" fontSize="12" fontWeight="700" fill="var(--text-primary)">
                 {fmt(total)}
             </text>
-            <text x={cx} y={cy + 12} textAnchor="middle" fontSize="10" fill="#71717a">
+            <text x={cx} y={cy + 12} textAnchor="middle" fontSize="10" fill="var(--text-muted)">
                 {title}
             </text>
         </svg>
@@ -118,8 +122,10 @@ function DonutCard({ title, monthName, lastDay, data, total, emptyColor }: {
 }
 
 // ── Main Component ─────────────────────────────────────────────
-export default function ReportsClient({ userName, workspace }: Props) {
+export default function ReportsClient({ userName: initialUserName, workspace }: Props) {
     const router = useRouter();
+    const { t } = useLanguage();
+    const { data: session } = useSession();
     const now = new Date();
 
     // UI State
@@ -129,6 +135,11 @@ export default function ReportsClient({ userName, workspace }: Props) {
     const [showManage, setShowManage] = useState(false);
     const [visible, setVisible] = useState<Record<ChartId, boolean>>(DEFAULT_VISIBLE);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [userName, setUserName] = useState(initialUserName);
 
     const toggleChart = (id: ChartId) => setVisible(v => ({ ...v, [id]: !v[id] }));
     const resetCharts = () => setVisible(DEFAULT_VISIBLE);
@@ -213,43 +224,109 @@ export default function ReportsClient({ userName, workspace }: Props) {
     const visibleCount = CHART_DEFS.filter(c => visible[c.id]).length;
 
     return (
-        <div className={styles.page}>
+        <div className={`${styles.page} ${sidebarCollapsed ? styles.pageCollapsed : ""}`}>
             {/* ─── Mobile sidebar overlay ─── */}
             {sidebarOpen && <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />}
+            {showProfileMenu && <div className={styles.profileMenuOverlay} onClick={() => setShowProfileMenu(false)} />}
 
             {/* ─── Sidebar ─── */}
-            <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
+            <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""} ${sidebarCollapsed ? styles.sidebarCollapsed : ""}`}>
                 <div className={styles.sidebarBrand}>
-                    <span className={styles.brandDot} />
-                    <span className={styles.brandName}>TuraTuno</span>
+                    <div className={styles.brandLogo}>
+                        <svg width="28" height="30" viewBox="0 0 120 130" fill="none">
+                            <path d="M60 8 L112 118 L88 118 L60 55 L32 118 L8 118 Z" fill="var(--logo-main)" />
+                            <path d="M60 55 Q70 78 88 118 L76 118 Q67 93 57 70 Z" fill="var(--logo-shadow)" />
+                        </svg>
+                    </div>
+                    {!sidebarCollapsed && <span className={styles.brandName}>TuraTuno</span>}
+
+                    <button
+                        className={styles.collapseBtn}
+                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        title={sidebarCollapsed ? "Expandir" : "Recolher"}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: sidebarCollapsed ? "rotate(180deg)" : "none", transition: "transform 0.3s ease" }}>
+                            <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                    </button>
                     <button className={styles.sidebarCloseBtn} onClick={() => setSidebarOpen(false)} title="Fechar menu">
                         ✕
                     </button>
                 </div>
                 <nav className={styles.nav}>
                     {[
-                        { icon: "📊", label: "Dashboard", href: "/dashboard", active: false },
-                        { icon: "📈", label: "Relatórios", href: "/dashboard/relatorios", active: true },
-                        { icon: "🏷️", label: "Categorias", href: "#", active: false },
-                        { icon: "🏦", label: "Contas Bancárias", href: "#", active: false },
-                        { icon: "💳", label: "Cartão de Crédito", href: "#", active: false },
-                        { icon: "⚙️", label: "Configuração", href: "#", active: false },
+                        { icon: "📊", labelKey: "dashboard" as const, href: "/dashboard", active: false },
+                        { icon: "📈", labelKey: "reports" as const, href: "/dashboard/relatorios", active: true },
+                        { icon: "🏷️", labelKey: "categories" as const, href: "#", active: false },
+                        { icon: "🏦", labelKey: "bankAccounts" as const, href: "#", active: false },
+                        { icon: "💳", labelKey: "creditCards" as const, href: "#", active: false },
+                        { icon: "⚙️", labelKey: "settings" as const, href: "#", active: false },
                     ].map(item => (
-                        <Link href={item.href} key={item.label} className={`${styles.navItem} ${item.active ? styles.navActive : ""}`}>
+                        <Link href={item.href} key={item.labelKey} className={`${styles.navItem} ${item.active ? styles.navActive : ""}`} title={sidebarCollapsed ? t(item.labelKey) : undefined}>
                             <span className={styles.navIcon}>{item.icon}</span>
-                            <span>{item.label}</span>
+                            {!sidebarCollapsed && <span>{t(item.labelKey)}</span>}
                         </Link>
                     ))}
                 </nav>
-                <div className={styles.sidebarUser}>
-                    <div className={styles.userAvatar}>{userName[0].toUpperCase()}</div>
-                    <div className={styles.userInfo}>
-                        <p className={styles.userName}>{userName.split(" ")[0]}</p>
-                        <p className={styles.userRole}>Owner</p>
+                {/* ─── Theme & Language Controls ─── */}
+                <div className={`${styles.sidebarControls} ${sidebarCollapsed ? styles.sidebarControlsCollapsed : ""}`}>
+                    {!sidebarCollapsed && <span className={styles.sidebarControlLabel}>{t("theme")}</span>}
+                    <ThemeToggleBtn collapsed={sidebarCollapsed} />
+                    {!sidebarCollapsed && <span className={styles.sidebarControlLabel} style={{ marginTop: "0.25rem" }}>{t("language")}</span>}
+                    <LanguageSelector collapsed={sidebarCollapsed} />
+                </div>
+
+                <div className={styles.profileMenuWrap}>
+                    {showProfileMenu && !sidebarCollapsed && (
+                        <div className={styles.profileMenu} onClick={e => e.stopPropagation()}>
+                            <div className={styles.profileMenuHeader}>
+                                <div className={styles.profileMenuAvatar}>
+                                    {avatarUrl
+                                        ? <img src={avatarUrl} alt="avatar" className={styles.userAvatar} />
+                                        : userName[0].toUpperCase()
+                                    }
+                                </div>
+                                <div className={styles.profileMenuInfo}>
+                                    <p className={styles.profileMenuName}>{userName}</p>
+                                    <p className={styles.profileMenuEmail}>{session?.user?.email ?? ""}</p>
+                                </div>
+                            </div>
+                            <div className={styles.profileMenuDivider} />
+                            <button
+                                className={styles.profileMenuItem}
+                                onClick={() => { setShowProfileMenu(false); setProfileOpen(true); }}
+                            >
+                                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                </svg>
+                                Configurações
+                            </button>
+                        </div>
+                    )}
+                    <div
+                        className={`${styles.sidebarUser} ${sidebarCollapsed ? styles.sidebarUserCollapsed : ""}`}
+                        onClick={() => sidebarCollapsed ? setProfileOpen(true) : setShowProfileMenu(v => !v)}
+                        title={sidebarCollapsed ? "Editar perfil" : "Menu do perfil"}
+                    >
+                        <div className={styles.userAvatar}>
+                            {avatarUrl
+                                ? <img src={avatarUrl} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                                : userName[0].toUpperCase()
+                            }
+                        </div>
+                        {!sidebarCollapsed && (
+                            <div className={styles.userInfo}>
+                                <p className={styles.userName}>{userName.split(" ")[0]}</p>
+                                <p className={styles.userRole}>{t("owner")}</p>
+                            </div>
+                        )}
+                        {!sidebarCollapsed && (
+                            <button className={styles.logoutIcon} onClick={e => { e.stopPropagation(); signOut({ callbackUrl: "/login" }); }} title={t("logout")}>
+                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                            </button>
+                        )}
                     </div>
-                    <button className={styles.logoutIcon} onClick={() => signOut({ callbackUrl: "/login" })} title="Sair">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-                    </button>
                 </div>
             </aside>
 
@@ -312,37 +389,37 @@ export default function ReportsClient({ userName, workspace }: Props) {
                         {/* Pizza Despesas */}
                         {visible["pizza-despesas"] && (
                             <DonutCard title="Despesas por Categoria" monthName={monthName} lastDay={lastDay}
-                                data={catGroups.expense} total={totalExp} emptyColor="#1a1a24" />
+                                data={catGroups.expense} total={totalExp} emptyColor="var(--bg-surface)" />
                         )}
 
                         {/* Pizza Receitas */}
                         {visible["pizza-receitas"] && (
                             <DonutCard title="Receitas por Categoria" monthName={monthName} lastDay={lastDay}
-                                data={catGroups.income} total={totalInc} emptyColor="#1a1a24" />
+                                data={catGroups.income} total={totalInc} emptyColor="var(--bg-surface)" />
                         )}
 
                         {/* Pizza Despesas Pagas */}
                         {visible["pizza-despesas-pagas"] && (
                             <DonutCard title="Despesas Pagas" monthName={monthName} lastDay={lastDay}
-                                data={catGroups.expPaid} total={totalExpPaid} emptyColor="#1a1a24" />
+                                data={catGroups.expPaid} total={totalExpPaid} emptyColor="var(--bg-surface)" />
                         )}
 
                         {/* Pizza Despesas Não Pagas */}
                         {visible["pizza-despesas-nao-pagas"] && (
                             <DonutCard title="Despesas Não Pagas" monthName={monthName} lastDay={lastDay}
-                                data={catGroups.expUnpaid} total={totalExpUnpd} emptyColor="#1a1a24" />
+                                data={catGroups.expUnpaid} total={totalExpUnpd} emptyColor="var(--bg-surface)" />
                         )}
 
                         {/* Pizza Receitas Pagas */}
                         {visible["pizza-receitas-pagas"] && (
                             <DonutCard title="Receitas Pagas" monthName={monthName} lastDay={lastDay}
-                                data={catGroups.incPaid} total={totalIncPaid} emptyColor="#1a1a24" />
+                                data={catGroups.incPaid} total={totalIncPaid} emptyColor="var(--bg-surface)" />
                         )}
 
                         {/* Pizza Receitas Não Pagas */}
                         {visible["pizza-receitas-nao-pagas"] && (
                             <DonutCard title="Receitas Não Pagas" monthName={monthName} lastDay={lastDay}
-                                data={catGroups.incUnpaid} total={totalIncUnpd} emptyColor="#1a1a24" />
+                                data={catGroups.incUnpaid} total={totalIncUnpd} emptyColor="var(--bg-surface)" />
                         )}
 
                         {/* Frequência (full-width bar chart) */}
@@ -448,6 +525,21 @@ export default function ReportsClient({ userName, workspace }: Props) {
                     userName={userName}
                     onClose={() => setModal(null)}
                     onSaved={() => { setModal(null); router.refresh(); }}
+                />
+            )}
+
+            {profileOpen && (session?.user as { id?: string } | undefined)?.id && (
+                <ProfileModal
+                    userId={(session!.user as { id: string }).id}
+                    name={userName}
+                    email={session?.user?.email ?? null}
+                    phone={(session?.user as { phone?: string } | undefined)?.phone ?? null}
+                    avatarUrl={avatarUrl}
+                    onClose={() => setProfileOpen(false)}
+                    onUpdated={(newName, newAvatar) => {
+                        setUserName(newName);
+                        setAvatarUrl(newAvatar);
+                    }}
                 />
             )}
         </div>

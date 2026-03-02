@@ -1,0 +1,28 @@
+# User Profile Menu Implementation Plan
+
+## Goal
+Implement a small, responsive pop-up menu that appears when a user clicks on their profile section in the dashboard sidebar. This menu will display their Name and Email (read-only) and a clickable "Configurações" (Settings) option, aligning with the premium UI expectations.
+
+## Proposed Changes
+
+### [src/app/dashboard/dashboard-client.tsx](file:///c:/Users/igor_/.gemini/antigravity/playground/turatuno/turatuno-web/src/app/dashboard/dashboard-client.tsx) and [src/app/dashboard/relatorios/reports-client.tsx](file:///c:/Users/igor_/.gemini/antigravity/playground/turatuno/turatuno-web/src/app/dashboard/relatorios/reports-client.tsx)
+- **[MODIFY] state variables**: Add a new state `showProfileMenu` to toggle the visibility of the popup menu.
+- **[MODIFY] user section**: Wrap the profile box with a conditional rendering block for the popup menu. The menu will stop event propagation so clicking inside it doesn't close the menu, but clicking outside will.
+- **[MODIFY] click handler**: Change the current `onClick` that sets `profileOpen` (which opens a full modal) to toggle `showProfileMenu` instead. Move the `setProfileOpen` logic into the "Configurações" button within the new menu.
+
+### [src/app/dashboard/dashboard.module.css](file:///c:/Users/igor_/.gemini/antigravity/playground/turatuno/turatuno-web/src/app/dashboard/dashboard.module.css) and [src/app/dashboard/relatorios/relatorios.module.css](file:///c:/Users/igor_/.gemini/antigravity/playground/turatuno/turatuno-web/src/app/dashboard/relatorios/relatorios.module.css)
+- **[MODIFY] popup menu styles**: Add CSS classes for `.profileMenu`, `.profileMenuHeader`, `.profileMenuEmail`, `.profileMenuItem` to style the floating menu card with a premium glassmorphic or solid surface look, complete with shadows and rounded corners.
+
+## Verification Plan
+
+### Automated Tests
+* None available for this specific UI component.
+
+### Manual Verification
+1. Open the dashboard.
+2. Click on the user profile section at the bottom of the sidebar.
+3. Verify that a small menu pops up.
+4. Verify the menu displays the user's Name and Email.
+5. Verify the menu has a clickable "Configurações" option.
+6. Click "Configurações" and visually confirm that it opens the user profile editing modal.
+7. Click outside the menu to verify it closes.

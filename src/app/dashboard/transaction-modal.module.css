@@ -27,7 +27,7 @@
     width: 100%;
     max-width: 480px;
     max-height: 90vh;
-    background: #0f0f17;
+    background: #0d1526;
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 20px;
     display: flex;
@@ -165,8 +165,8 @@
 }
 
 .fieldInput:focus {
-    border-color: rgba(99, 102, 241, 0.45);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: rgba(37, 99, 235, 0.45);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .valueInput {
@@ -176,7 +176,7 @@
 }
 
 .valueInput:focus {
-    border-color: rgba(99, 102, 241, 0.45);
+    border-color: rgba(37, 99, 235, 0.45);
 }
 
 /* Select */
@@ -203,7 +203,7 @@
 }
 
 .fieldSelect:focus {
-    border-color: rgba(99, 102, 241, 0.45);
+    border-color: rgba(37, 99, 235, 0.45);
 }
 
 .fieldSelect:disabled {
@@ -238,7 +238,7 @@
 }
 
 .dateInput:focus {
-    border-color: rgba(99, 102, 241, 0.45);
+    border-color: rgba(37, 99, 235, 0.45);
 }
 
 /* ── Config card (icon + title + toggle) ── */
